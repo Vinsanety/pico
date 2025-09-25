@@ -1,0 +1,147 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f4f4;
+  color: #333;
+}
+
+header {
+  background: #2c3e50;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+main {
+  max-width: 800px;
+  margin: auto;
+  padding: 1rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  font-weight: bold;
+}
+
+input,
+select,
+button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+button {
+  background: #2c3e50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #34495e;
+}
+
+p {
+  margin: 0.5rem 0;
+}
+
+#peak-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* two equal columns */
+  gap: 1rem; /* space between columns */
+  align-items: end; /* align inputs nicely */
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field.peak-combobox {
+  position: relative;
+}
+
+/* Suggestions dropdown */
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  /* border: 1px solid #ccc; */
+  border-radius: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.suggestions li {
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.suggestions li:hover {
+  background: #f0f6ff;
+}
+
+.form-actions {
+  grid-column: 1 / -1; /* button spans both columns */
+  text-align: center;
+}
+
+#peaks {
+  list-style: none;
+  padding: 0;
+}
+
+#peaks button {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+#peaks button:hover {
+  color: darkred;
+}
+
+#peaks li {
+  background: white;
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  border-radius: 5px;
+}
+
+#preview-banner {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 140, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  z-index: 1000;
+  cursor: pointer;
+  transition: top 0.3s ease-in-out;
+}
+
+#preview-banner.show {
+  top: 10px;
+}

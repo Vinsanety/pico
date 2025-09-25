@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pico - Peak Tracker</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- MarkerCluster CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Pico 🏔</h1>
+      <p>Log your mountain summits and track your progress</p>
+    </header>
+
+    <main>
+      <!-- Add Peak Section -->
+      <section id="add-peak">
+        <h2>Add a New Peak</h2>
+        <form id="peak-form">
+          <div class="form-field peak-combobox">
+            <label for="peak-input">Enter a Peak:</label>
+            <input
+              type="text"
+              id="peak-input"
+              name="peak-input"
+              placeholder="Start typing a peak..."
+              autocomplete="off"
+              required
+            />
+            <!-- Custom dropdown -->
+            <ul id="suggestions" class="suggestions"></ul>
+          </div>
+
+          <div class="form-field">
+            <label for="peak-date">Date Summited:</label>
+            <input type="date" id="peak-date" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit">Add Peak</button>
+          </div>
+        </form>
+      </section>
+
+      <div id="peak-preview"></div>
+      <div id="map" style="height: 300px; margin-top: 1rem"></div>
+
+      <!-- Stats Section -->
+      <section id="stats">
+        <h2>Stats</h2>
+        <p>Total Peaks Summited: <span id="peak-count">0</span></p>
+        <p>Total Peaks in Database: <span id="total-peaks">Loading...</span></p>
+      </section>
+
+      <!-- List of Peaks -->
+      <section id="peak-list">
+        <h2>My Peaks</h2>
+        <ul id="peaks"></ul>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Pico - Peak Tracker</p>
+    </footer>
+
+    <!-- Leaflet & JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
