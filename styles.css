@@ -1,3 +1,5 @@
+/* === GLOBAL HTML === */
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -52,6 +54,12 @@ button:hover {
 
 p {
   margin: 0.5rem 0;
+}
+
+/* === CLASSES === */
+
+.header-logo {
+  max-width: 420px;
 }
 
 #peak-form {
