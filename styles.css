@@ -90,7 +90,8 @@ label {
 }
 
 input[type="text"],
-input[type="date"] {
+input[type="date"],
+input[type="number"] {
   width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -234,12 +235,6 @@ ul#suggestions li:hover {
   color: var(--red);
   cursor: pointer;
   font-size: 16px;
-}
-
-.legend {
-  margin-top: 12px;
-  font-size: 12px;
-  color: var(--muted);
 }
 
 footer {

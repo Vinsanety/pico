@@ -27,19 +27,11 @@
       <!-- Sidebar -->
       <aside>
         <img src="/logo/Pico-Summit-Log_FULL-LOGO.svg" alt="Pico Summit Log" />
-        <div class="muted">Log your summits and explore the dataset.</div>
+        <div class="muted">Log your summits and track your progress.</div>
 
         <div class="counts">
           <div class="chip">
-            <strong>Total dataset:</strong> <span id="total-peaks">…</span>
-          </div>
-          <div class="chip">
-            <strong>Your list:</strong> <span id="peak-count">0</span>
-          </div>
-
-          <div class="toggle-row">
-            <input type="checkbox" id="explorable-toggle" />
-            <label for="explorable-toggle">All dataset peaks</label>
+            <strong>Your Summits:</strong> <span id="peak-count">0</span>
           </div>
         </div>
 
@@ -53,6 +45,9 @@
           />
           <ul id="suggestions"></ul>
 
+          <label for="peak-elevation">Elevation (ft)</label>
+          <input id="peak-elevation" type="number" placeholder="e.g. 14265" />
+
           <label for="peak-date">Date climbed</label>
           <input id="peak-date" type="date" />
 
@@ -63,11 +58,6 @@
 
         <h2 class="muted" style="margin-top: 16px">My peaks</h2>
         <ul id="peaks"></ul>
-
-        <div class="legend">
-          - Dataset peaks show as default markers in clusters.<br />
-          - Your added peaks are clustered and deletable from the list.
-        </div>
       </aside>
 
       <!-- Map -->
