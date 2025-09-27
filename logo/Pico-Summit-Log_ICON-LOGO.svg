@@ -1,0 +1,23 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" role="img">
+  <!-- Background -->
+  <rect x="0" y="0" width="256" height="256" fill="#0F1A20" />
+
+  <!-- Group containing sun + mountains, centered -->
+  <g transform="translate(-42,35) scale(1.25)">
+    <!-- Sun -->
+    <circle cx="125" cy="55" r="28" fill="#F0B429" />
+
+    <!-- Mountain group -->
+    <g transform="translate(40,25)">
+      <!-- Far ridge -->
+      <path d="M15 110 L70 45 L100 75 L130 60 L160 110 Z" fill="#3D5A73" />
+      <!-- Main peak -->
+      <path d="M40 110 L110 20 L180 110 Z" fill="#2C5F2D" />
+      <!-- Snow cap -->
+      <path d="M96 38 L110 20 L124 38 L106 42 Z" fill="#E6F2F0" />
+      <!-- Summit flag -->
+      <line x1="110" y1="21" x2="110" y2="-10" stroke="#FFFFFF" stroke-width="2" />
+      <polygon points="110,-10 130,-5 110,0" fill="red" />
+    </g>
+  </g>
+</svg>
