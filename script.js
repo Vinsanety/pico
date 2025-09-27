@@ -7,12 +7,14 @@ const suggestions = document.getElementById("suggestions");
 const totalPeaksEl = document.getElementById("total-peaks");
 const dateInput = document.getElementById("peak-date");
 const previewBox = document.getElementById("peak-preview");
+const explorableToggle = document.getElementById("explorable-toggle");
 
 // ===== State =====
 let peaks = JSON.parse(localStorage.getItem("peaks")) || [];
 let allPeaks = []; // dataset peaks
 let map;
-let markersCluster;
+let userMarkersCluster;
+let datasetMarkersCluster;
 let previewMarker = null;
 
 // ===== Custom Icons =====
@@ -41,9 +43,10 @@ function renderPeaks() {
     const li = document.createElement("li");
     li.textContent = `${peak.name} - ${
       peak.height ? peak.height + " ft" : "unknown height"
-    } - ${peak.date} `;
+    } - ${peak.date || "no date"} `;
 
     const delBtn = document.createElement("button");
+    delBtn.className = "delete-btn";
     delBtn.textContent = "❌";
     delBtn.title = "Delete this peak";
     delBtn.style.marginLeft = "8px";
@@ -52,7 +55,7 @@ function renderPeaks() {
         peaks.splice(index, 1);
         savePeaks();
         renderPeaks();
-        renderMarkers();
+        renderUserMarkers();
       }
     };
 
@@ -64,25 +67,53 @@ function renderPeaks() {
 
 // ===== Map Setup =====
 function initMap() {
-  map = L.map("map").setView([20, 0], 2);
+  map = L.map("map", {
+    center: [39.5, -98.35], // USA center
+    zoom: 4.5,
+    worldCopyJump: false,
+    maxBounds: [
+      [85, -180],
+      [-85, 180],
+    ],
+  });
+
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
+    noWrap: true,
   }).addTo(map);
 
-  markersCluster = L.markerClusterGroup();
-  map.addLayer(markersCluster);
+  datasetMarkersCluster = L.markerClusterGroup();
+  userMarkersCluster = L.markerClusterGroup();
+  map.addLayer(userMarkersCluster);
 }
 
-function renderMarkers() {
-  markersCluster.clearLayers();
+function renderUserMarkers() {
+  userMarkersCluster.clearLayers();
   peaks.forEach((peak) => {
     if (peak.lat && peak.lon) {
       const marker = L.marker([peak.lat, peak.lon]).bindPopup(
         `<strong>${peak.name}</strong><br>
-         ${peak.height ? `Height: ${peak.height} ft<br>` : ""}
-         Date: ${peak.date}`
+             ${peak.height ? `Height: ${peak.height} ft<br>` : ""}
+             ${peak.date ? `Date: ${peak.date}` : ""}`
       );
-      markersCluster.addLayer(marker);
+      userMarkersCluster.addLayer(marker);
+    }
+  });
+}
+
+function renderDatasetMarkers() {
+  datasetMarkersCluster.clearLayers();
+  allPeaks.forEach((p) => {
+    if (p.lat && p.lon) {
+      const marker = L.marker([p.lat, p.lon]).bindPopup(
+        `<strong>${p.name}</strong><br>
+             ${
+               p.height
+                 ? `Height: ${metersToFeet(p.height)} ft`
+                 : "Height: unknown"
+             }`
+      );
+      datasetMarkersCluster.addLayer(marker);
     }
   });
 }
@@ -116,14 +147,14 @@ function showPreview(peakData) {
   previewBanner.classList.add("show");
 
   previewBox.innerHTML = `
-    <strong>${peakData.name}</strong><br>
-    ${peakData.height ? `Height: ${peakData.height} ft<br>` : ""}
-    ${
-      peakData.lat && peakData.lon
-        ? `Lat: ${peakData.lat}, Lon: ${peakData.lon}`
-        : ""
-    }
-  `;
+        <strong>${peakData.name}</strong><br>
+        ${peakData.height ? `Height: ${peakData.height} ft<br>` : ""}
+        ${
+          peakData.lat && peakData.lon
+            ? `Lat: ${peakData.lat}, Lon: ${peakData.lon}`
+            : ""
+        }
+      `;
 
   if (peakData.lat && peakData.lon) {
     map.setView([peakData.lat, peakData.lon], 8);
@@ -139,6 +170,26 @@ function showPreview(peakData) {
       .bindPopup(`<strong>${peakData.name}</strong>`)
       .openPopup();
   }
+}
+
+// ===== Explorable Toggle =====
+function applyExplorableToggle() {
+  if (!explorableToggle) return;
+
+  // Initial state
+  if (explorableToggle.checked) {
+    map.addLayer(datasetMarkersCluster);
+  } else if (map.hasLayer(datasetMarkersCluster)) {
+    map.removeLayer(datasetMarkersCluster);
+  }
+
+  explorableToggle.addEventListener("change", () => {
+    if (explorableToggle.checked) {
+      map.addLayer(datasetMarkersCluster);
+    } else if (map.hasLayer(datasetMarkersCluster)) {
+      map.removeLayer(datasetMarkersCluster);
+    }
+  });
 }
 
 // ===== Fetch Open Peaks Data =====
@@ -158,8 +209,10 @@ async function init() {
 
     totalPeaksEl.textContent = allPeaks.length.toLocaleString();
     initMap();
+    renderDatasetMarkers(); // prepare dataset markers
     renderPeaks();
-    renderMarkers();
+    renderUserMarkers();
+    applyExplorableToggle();
   } catch (err) {
     console.error("Error fetching peaks:", err);
     totalPeaksEl.textContent = "Error loading";
@@ -289,7 +342,7 @@ form.addEventListener("submit", async (e) => {
   peaks.push(peakData);
   savePeaks();
   renderPeaks();
-  renderMarkers();
+  renderUserMarkers();
   form.reset();
   peakInput.dataset.lat = "";
   peakInput.dataset.lon = "";

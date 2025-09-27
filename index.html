@@ -23,67 +23,65 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <!-- <h1 class="hidden">Pico Summit Log</h1> -->
-      <img class="header-logo" src="/logo/Pico-Summit-Log_FULL-LOGO.svg" />
-      <p>Log your mountain summits and track your progress</p>
-    </header>
+    <div class="app">
+      <!-- Sidebar -->
+      <aside>
+        <img src="/logo/Pico-Summit-Log_FULL-LOGO.svg" alt="Pico Summit Log" />
+        <div class="muted">Log your summits and explore the dataset.</div>
 
-    <main>
-      <!-- Add Peak Section -->
-      <section id="add-peak">
-        <h2>Add a New Peak</h2>
+        <div class="counts">
+          <div class="chip">
+            <strong>Total dataset:</strong> <span id="total-peaks">…</span>
+          </div>
+          <div class="chip">
+            <strong>Your list:</strong> <span id="peak-count">0</span>
+          </div>
+
+          <div class="toggle-row">
+            <input type="checkbox" id="explorable-toggle" />
+            <label for="explorable-toggle">All dataset peaks</label>
+          </div>
+        </div>
+
         <form id="peak-form">
-          <div class="form-field peak-combobox">
-            <label for="peak-input">Enter a Peak:</label>
-            <input
-              type="text"
-              id="peak-input"
-              name="peak-input"
-              placeholder="Start typing a peak..."
-              autocomplete="off"
-              required
-            />
-            <!-- Custom dropdown -->
-            <ul id="suggestions" class="suggestions"></ul>
-          </div>
+          <label for="peak-input">Peak name</label>
+          <input
+            id="peak-input"
+            type="text"
+            placeholder="Start typing a peak…"
+            autocomplete="off"
+          />
+          <ul id="suggestions"></ul>
 
-          <div class="form-field">
-            <label for="peak-date">Date Summited:</label>
-            <input type="date" id="peak-date" required />
-          </div>
+          <label for="peak-date">Date climbed</label>
+          <input id="peak-date" type="date" />
 
-          <div class="form-actions">
-            <button type="submit">Add Peak</button>
-          </div>
+          <button type="submit">Add to my peaks</button>
         </form>
-      </section>
 
-      <!-- MAPS -->
-      <div id="peak-preview"></div>
-      <div id="map"></div>
+        <div id="peak-preview"></div>
 
-      <!-- Stats Section -->
-      <section id="stats">
-        <h2>Stats</h2>
-        <p>Total Peaks Summited: <span id="peak-count">0</span></p>
-        <p>Total Peaks in Database: <span id="total-peaks">Loading...</span></p>
-      </section>
-
-      <!-- List of Peaks -->
-      <section id="peak-list">
-        <h2>My Peaks</h2>
+        <h2 class="muted" style="margin-top: 16px">My peaks</h2>
         <ul id="peaks"></ul>
-      </section>
-    </main>
+
+        <div class="legend">
+          - Dataset peaks show as default markers in clusters.<br />
+          - Your added peaks are clustered and deletable from the list.
+        </div>
+      </aside>
+
+      <!-- Map -->
+      <div id="map">
+        <div id="preview-banner">🔍 Preview Mode — Click to exit</div>
+      </div>
+    </div>
 
     <footer>
-      <p class="vahala-designs">&copy; 2025 Vahala Designs</p>
+      <p class="copyright">&copy; 2025 Vahala Designs</p>
     </footer>
 
     <!-- Leaflet & JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- MarkerCluster JS -->
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="script.js"></script>
   </body>
