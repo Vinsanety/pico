@@ -60,9 +60,9 @@ function renderPeaks() {
 
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
-    delBtn.textContent = "❌";
+    delBtn.textContent = "\u2715";
     delBtn.onclick = () => {
-      if (confirm(`Delete ${peak.name}?`)) {
+      if (confirm(`Are you sure you want to Delete ${peak.name}?`)) {
         peaks.splice(index, 1);
         savePeaks();
         renderPeaks();
@@ -74,6 +74,33 @@ function renderPeaks() {
     peaksList.appendChild(li);
   });
   peakCount.textContent = peaks.length;
+}
+
+/* ===Date Input=== */
+dateInput.addEventListener("input", () => {
+  if (previewBox.classList.contains("show")) {
+    // Grab the last peakData shown (you can store it globally when calling showPreview)
+    const currentPeak = {
+      name: peakInput.value,
+      city: peakInput.dataset.city || "",
+      state: peakInput.dataset.state || "",
+      elevation: peakInput.dataset.elevation || "",
+      lat: peakInput.dataset.lat || null,
+      lon: peakInput.dataset.lon || null,
+    };
+    showPreview(currentPeak);
+  }
+});
+
+function formatDateUS(isoDateStr) {
+  if (!isoDateStr) return "";
+  const [year, month, day] = isoDateStr.split("-").map(Number);
+  const dateObj = new Date(year, month - 1, day); // local date
+  return dateObj.toLocaleDateString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 // ===== Map Setup =====
@@ -117,6 +144,16 @@ function showPreview(peakData) {
   if (!peakData) {
     previewBanner.classList.remove("show");
     previewBox.innerHTML = "";
+    previewBox.classList.remove("show");
+
+    if (peakInput) {
+      peakInput.value = "";
+    }
+
+    if (dateInput) {
+      dateInput.value = "";
+    }
+
     if (previewMarker) {
       map.removeLayer(previewMarker);
       previewMarker = null;
@@ -126,10 +163,32 @@ function showPreview(peakData) {
   }
 
   previewBanner.classList.add("show");
+  previewBox.classList.add("show");
+
   previewBox.innerHTML = `
-    <strong>${peakData.name}</strong><br>
-    ${peakData.city ? peakData.city + ", " : ""}${peakData.state || ""}<br>
-    ${peakData.elevation ? `Elevation: ${peakData.elevation} ft` : ""}
+  <h5 class="muted">Peak to add</h5>
+    ${
+      dateInput.value
+        ? `<p class="preview-data">
+            <span class="preview-label">Date:</span>
+            <span class="preview-value">
+              ${formatDateUS(dateInput.value)}
+            </span>
+          </p>`
+        : ""
+    }
+    <p class="preview-data">
+      <span class="preview-label">Summit:</span>
+      <span class="preview-value">${peakData.name}</span>
+    </p>
+    ${
+      peakData.elevation
+        ? `<p class="preview-data">
+            <span class="preview-label">Elevation:</span>
+            <span class="preview-value">${peakData.elevation} ft</span>
+          </p>`
+        : ""
+    }
   `;
 
   if (peakData.lat && peakData.lon) {
@@ -151,6 +210,7 @@ peakInput.addEventListener("input", () => {
 
   if (query.length < 2) {
     suggestions.innerHTML = "";
+    suggestions.classList.remove("show"); // hide suggestions
     return;
   }
 
@@ -164,6 +224,12 @@ peakInput.addEventListener("input", () => {
         )}`
       );
       const results = await res.json();
+
+      if (results.length > 0) {
+        suggestions.classList.add("show"); // show suggestions
+      } else {
+        suggestions.classList.remove("show");
+      }
 
       for (const r of results.slice(0, 5)) {
         const li = document.createElement("li");
@@ -180,7 +246,9 @@ peakInput.addEventListener("input", () => {
           peakInput.dataset.city =
             r.address.city || r.address.town || r.address.village || "";
           peakInput.dataset.state = r.address.state || "";
+
           suggestions.innerHTML = "";
+          suggestions.classList.remove("show"); // hide after selection
 
           showPreview({
             name: r.display_name,
@@ -195,14 +263,23 @@ peakInput.addEventListener("input", () => {
       }
     } catch (err) {
       console.error("Autocomplete error:", err);
+      suggestions.classList.remove("show");
     }
   }, 300);
+});
+
+// Close suggestions if clicking outside
+document.addEventListener("click", (e) => {
+  if (!suggestions.contains(e.target) && e.target !== peakInput) {
+    suggestions.classList.remove("show");
+  }
 });
 
 // ===== Form Submission =====
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  previewBox.classList.remove("show");
   const name = peakInput.value.trim();
   const date = dateInput.value;
   let elevation = elevationInput.value
@@ -267,6 +344,12 @@ function init() {
   initMap();
   renderPeaks();
   renderUserMarkers();
+
+  // Ensure hidden by default on load
+  suggestions.classList.remove("show");
+  previewBox.classList.remove("show");
+  // Optional: center map to a neutral view
+  map.setView([39.5, -98.35], 4.5);
 }
 
 init();

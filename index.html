@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pico - Peak Tracker</title>
+    <title>Pico - Summit Log</title>
     <link
       rel="icon"
       href="/logo/Pico-Summit-Log_ICON-LOGO.svg"
@@ -26,8 +26,13 @@
     <div class="app">
       <!-- Sidebar -->
       <aside>
-        <img src="/logo/Pico-Summit-Log_FULL-LOGO.svg" alt="Pico Summit Log" />
-        <div class="muted">Log your summits and track your progress.</div>
+        <header>
+          <img
+            src="/logo/Pico-Summit-Log_FULL-LOGO.svg"
+            alt="Pico Summit Log"
+          />
+          <div class="muted">Log your summits and track your progress.</div>
+        </header>
 
         <div class="counts">
           <div class="chip">
@@ -36,25 +41,42 @@
         </div>
 
         <form id="peak-form">
-          <label for="peak-input">Peak name</label>
-          <input
-            id="peak-input"
-            type="text"
-            placeholder="Start typing a peak…"
-            autocomplete="off"
-          />
-          <ul id="suggestions"></ul>
+          <div class="form-fields-container">
+            <!-- Date Input -->
+            <div class="form-field">
+              <label for="peak-date">Date climbed</label>
+              <input id="peak-date" type="date" />
+            </div>
 
-          <label for="peak-elevation">Elevation (ft)</label>
-          <input id="peak-elevation" type="number" placeholder="e.g. 14265" />
+            <!-- Peak Name Combobox -->
+            <div class="form-field">
+              <label for="peak-input">Summit</label>
+              <input
+                id="peak-input"
+                type="text"
+                placeholder="Start typing a peak…"
+                autocomplete="off"
+              />
+              <ul id="suggestions"></ul>
+            </div>
 
-          <label for="peak-date">Date climbed</label>
-          <input id="peak-date" type="date" />
+            <!-- Elevation Input -->
+            <div class="form-field">
+              <label for="peak-elevation">Elevation (ft)</label>
+              <input
+                id="peak-elevation"
+                type="number"
+                placeholder="e.g. 14265"
+              />
+            </div>
+          </div>
 
-          <button type="submit">Add to my peaks</button>
+          <!-- Preview Data before clickign submit button -->
+          <div id="peak-preview"></div>
+
+          <!-- Submit Button -->
+          <button type="submit">Add peak</button>
         </form>
-
-        <div id="peak-preview"></div>
 
         <h2 class="muted" style="margin-top: 16px">My peaks</h2>
         <ul id="peaks"></ul>

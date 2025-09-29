@@ -41,7 +41,7 @@ header {
 .app {
   display: grid;
   grid-template-columns: 360px 1fr;
-  grid-template-rows: calc(100vh - 32px); /* Subtract footer height */
+  grid-template-rows: calc(100vh - 32px);
 }
 
 aside {
@@ -56,19 +56,16 @@ aside {
   position: relative;
 }
 
-/* Responsive layout: stack map above sidebar below 667px */
 @media (max-width: 667px) {
   .app {
     display: flex;
     flex-direction: column;
     height: auto;
   }
-
   #map {
     order: 1;
     height: 50vh;
   }
-
   aside {
     order: 2;
     border-right: none;
@@ -82,44 +79,122 @@ aside {
   font-size: 13px;
 }
 
-label {
-  display: block;
-  font-size: 13px;
-  margin: 12px 0 6px;
-  color: var(--muted);
+#peak-form .form-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
+.form-field label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #f3f4f6;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: color 0.2s ease;
+}
+
+.form-field:focus-within label {
+  color: var(--accent);
+}
+
+/* Base input styles */
 input[type="text"],
 input[type="date"],
 input[type="number"] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid var(--border);
+  border: 2px solid #374151;
   background: #0b1220;
   color: var(--text);
   outline: none;
+  font-weight: 500;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s,
+    transform 0.15s;
 }
 
-/* Style Calender Icon White in Chrome, Edge, Safari */
+/* Hover state */
+input[type="text"]:hover,
+input[type="date"]:hover,
+input[type="number"]:hover {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.35);
+  transform: translateY(-1px); /* subtle lift */
+}
+
+/* Focus state */
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus {
+  border-color: var(--accent);
+  background: #111b2d;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.45);
+}
+
+/* Number input specific tweaks */
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox: remove spinners */
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Chrome/Safari: remove spinners */
+  margin: 0;
+}
+
+input[type="number"] {
+  padding-right: 18px;
+  letter-spacing: 0.5px; /* makes numbers feel more airy */
+}
+
+/* Style type="date" calendar icon to be white in Safari, Chrome, Edge */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1) sepia(1) saturate(5) hue-rotate(200deg);
   cursor: pointer;
 }
 
 button[type="submit"] {
-  margin-top: 12px;
   width: 100%;
-  padding: 10px 12px;
+  margin-top: 2rem;
+  padding: 14px 16px;
   border-radius: 8px;
-  border: 1px solid var(--accent-dim);
-  background: var(--accent-dim);
-  color: var(--text);
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #0f172a;
+  font-weight: 700;
   cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease, transform 0.15s ease;
 }
 
 button[type="submit"]:hover {
-  background: #0b7a66;
+  background: #10b981;
+  color: #0f172a;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  transform: translateY(-2px);
+}
+
+button[type="submit"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.45);
+  background: var(--accent);
+  color: #0f172a;
+}
+
+button[type="submit"]:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+#suggestions {
+  display: none; /* hidden until typing */
+}
+
+#suggestions.show {
+  display: block;
 }
 
 ul#suggestions,
@@ -149,10 +224,16 @@ ul#peaks li:last-child {
 
 ul#suggestions li {
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 ul#suggestions li:hover {
   background: #0f1a30;
+}
+
+ul#peaks li span.elevation {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 #preview-banner {
@@ -178,13 +259,43 @@ ul#suggestions li:hover {
 }
 
 #peak-preview {
-  margin-top: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: #0b1220;
-  border: 1px solid var(--border);
-  font-size: 13px;
-  min-height: 40px;
+  display: none; /* hidden until peak selected */
+  margin-top: 1rem;
+  padding: 1.5rem 1.25rem;
+  border-radius: 10px;
+  border-left: 4px solid var(--accent);
+  background: #111b2d;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+#peak-preview.show {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#peak-preview h5 {
+  color: var(--accent);
+  margin: 0;
+}
+
+#peak-preview .preview-data {
+  margin: 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed #374151;
+}
+
+#peak-preview .preview-data:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+#peak-preview .preview-label {
+  font-weight: 600;
+  color: var(--muted);
+}
+#peak-preview .preview-value {
+  color: var(--text);
 }
 
 .counts {
@@ -206,35 +317,31 @@ ul#suggestions li:hover {
   color: var(--accent);
 }
 
-.toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0 12px;
-  padding: 8px 12px;
-  background: #0b1220;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.toggle-row label {
-  margin: 0;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.toggle-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent);
-}
-
 .delete-btn {
   border: none;
   background: transparent;
   color: var(--red);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.delete-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.delete-btn:active {
+  transform: translateY(1px);
+  background: rgba(239, 68, 68, 0.25);
 }
 
 footer {
@@ -247,9 +354,10 @@ footer {
   margin: 0;
   padding: 0;
   border-top: 1px solid var(--border);
-  .copyright {
-    font-size: 0.75rem;
-    padding: 0.5rem;
-    margin: 0;
-  }
+}
+
+footer .copyright {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  margin: 0;
 }
