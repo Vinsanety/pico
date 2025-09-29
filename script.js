@@ -60,7 +60,7 @@ function renderPeaks() {
 
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
-    delBtn.textContent = "❌";
+    delBtn.textContent = "X";
     delBtn.onclick = () => {
       if (confirm(`Delete ${peak.name}?`)) {
         peaks.splice(index, 1);

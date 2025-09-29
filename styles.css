@@ -41,7 +41,7 @@ header {
 .app {
   display: grid;
   grid-template-columns: 360px 1fr;
-  grid-template-rows: calc(100vh - 32px); /* Subtract footer height */
+  grid-template-rows: calc(100vh - 32px);
 }
 
 aside {
@@ -56,19 +56,16 @@ aside {
   position: relative;
 }
 
-/* Responsive layout: stack map above sidebar below 667px */
 @media (max-width: 667px) {
   .app {
     display: flex;
     flex-direction: column;
     height: auto;
   }
-
   #map {
     order: 1;
     height: 50vh;
   }
-
   aside {
     order: 2;
     border-right: none;
@@ -86,22 +83,38 @@ label {
   display: block;
   font-size: 13px;
   margin: 12px 0 6px;
-  color: var(--muted);
+  color: #f3f4f6;
+  font-weight: 600;
 }
 
 input[type="text"],
 input[type="date"],
 input[type="number"] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid var(--border);
+  border: 2px solid #374151;
   background: #0b1220;
   color: var(--text);
   outline: none;
+  font-weight: 500;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-/* Style Calender Icon White in Chrome, Edge, Safari */
+input[type="text"]:hover,
+input[type="date"]:hover,
+input[type="number"]:hover {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.35);
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+  background: #111b2d;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1) sepia(1) saturate(5) hue-rotate(200deg);
   cursor: pointer;
@@ -110,16 +123,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 button[type="submit"] {
   margin-top: 12px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-radius: 8px;
-  border: 1px solid var(--accent-dim);
-  background: var(--accent-dim);
-  color: var(--text);
+  border: 2px solid var(--accent);
+  background: var(--accent);
+  color: #0f172a;
+  font-weight: 700;
   cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
 button[type="submit"]:hover {
-  background: #0b7a66;
+  background: #10b981; /* slightly darker green */
+  color: #0f172a;
+  box-shadow: none;
+}
+
+button[type="submit"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: none;
+  background: transparent;
+  color: var(--accent);
+}
+
+button[type="submit"]:active {
+  box-shadow: none;
 }
 
 ul#suggestions,
@@ -149,10 +179,16 @@ ul#peaks li:last-child {
 
 ul#suggestions li {
   cursor: pointer;
+  transition: background 0.2s;
 }
 
 ul#suggestions li:hover {
   background: #0f1a30;
+}
+
+ul#peaks li span.elevation {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 #preview-banner {
@@ -235,6 +271,15 @@ ul#suggestions li:hover {
   color: var(--red);
   cursor: pointer;
   font-size: 16px;
+  line-height: 1;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
 
 footer {
@@ -247,9 +292,10 @@ footer {
   margin: 0;
   padding: 0;
   border-top: 1px solid var(--border);
-  .copyright {
-    font-size: 0.75rem;
-    padding: 0.5rem;
-    margin: 0;
-  }
+}
+
+footer .copyright {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  margin: 0;
 }
