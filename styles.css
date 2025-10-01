@@ -198,7 +198,7 @@ button[type="submit"]:active {
 }
 
 ul#suggestions,
-ul#peaks {
+ul#my-peaks {
   list-style: none;
   padding: 0;
   margin: 8px 0 0;
@@ -208,7 +208,7 @@ ul#peaks {
 }
 
 ul#suggestions li,
-ul#peaks li {
+ul#my-peaks li {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -218,7 +218,7 @@ ul#peaks li {
 }
 
 ul#suggestions li:last-child,
-ul#peaks li:last-child {
+ul#my-peaks li:last-child {
   border-bottom: none;
 }
 
@@ -231,7 +231,7 @@ ul#suggestions li:hover {
   background: #0f1a30;
 }
 
-ul#peaks li span.elevation {
+ul#my-peaks li span.elevation {
   color: var(--accent);
   font-weight: 600;
 }
