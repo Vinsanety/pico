@@ -1,12 +1,13 @@
 // ===== DOM Elements =====
 const form = document.getElementById("peak-form");
-const peaksList = document.getElementById("peaks");
-const peakCount = document.getElementById("peak-count");
-const peakInput = document.getElementById("peak-input");
-const suggestions = document.getElementById("suggestions");
+const myPeakCount = document.getElementById("my-peak-count");
 const dateInput = document.getElementById("peak-date");
-const previewBox = document.getElementById("peak-preview");
+const peakInput = document.getElementById("peak-input");
+const peakSuggestions = document.getElementById("peak-suggestions");
 const elevationInput = document.getElementById("peak-elevation");
+const addPeakPreview = document.getElementById("add-peak-preview");
+const myPeaksList = document.getElementById("my-peaks");
+const previewModeBanner = document.getElementById("preview-mode-banner");
 
 // ===== State =====
 let peaks = JSON.parse(localStorage.getItem("peaks")) || [];
@@ -51,7 +52,7 @@ function savePeaks() {
 }
 
 function renderPeaks() {
-  peaksList.innerHTML = "";
+  myPeaksList.innerHTML = "";
   peaks.forEach((peak, index) => {
     const li = document.createElement("li");
     li.textContent = `${peak.name}${peak.city ? " - " + peak.city : ""}${
@@ -72,14 +73,14 @@ function renderPeaks() {
     };
 
     li.appendChild(delBtn);
-    peaksList.appendChild(li);
+    myPeaksList.appendChild(li);
   });
-  peakCount.textContent = peaks.length;
+  myPeakCount.textContent = peaks.length;
 }
 
 /* ===Date Input=== */
 dateInput.addEventListener("input", () => {
-  if (previewBox.classList.contains("show")) {
+  if (addPeakPreview.classList.contains("show")) {
     // Grab the last peakData shown (you can store it globally when calling showPreview)
     const currentPeak = {
       name: peakInput.value,
@@ -123,10 +124,17 @@ function renderUserMarkers() {
   userMarkersCluster.clearLayers();
   peaks.forEach((peak) => {
     if (peak.lat && peak.lon) {
-      const marker = L.marker([peak.lat, peak.lon]).bindPopup(
-        `<strong>${peak.name}</strong><br>
-         ${peak.city ? peak.city + ", " : ""}${peak.state || ""}<br>
-         ${peak.elevation ? `Elevation: ${peak.elevation} ft` : ""}`
+      const marker = L.marker([peak.lat, peak.lon], {
+        icon: L.divIcon({
+          className: "custom-marker",
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        }),
+      }).bindPopup(
+        `<strong>${peak.name}</strong><br> 
+        ${peak.city ? peak.city + ", " : ""}
+        ${peak.state || ""}<br> 
+        ${peak.elevation ? `Elevation: ${peak.elevation} ft` : ""}`
       );
       userMarkersCluster.addLayer(marker);
     }
@@ -134,18 +142,13 @@ function renderUserMarkers() {
 }
 
 // ===== Live Preview =====
-const previewBanner = document.createElement("div");
-previewBanner.id = "preview-banner";
-previewBanner.textContent = "🔍 Preview Mode — Click to exit";
-document.getElementById("map").appendChild(previewBanner);
-
-previewBanner.addEventListener("click", () => showPreview(null));
+previewModeBanner.addEventListener("click", () => showPreview(null));
 
 function showPreview(peakData) {
   if (!peakData) {
-    previewBanner.classList.remove("show");
-    previewBox.innerHTML = "";
-    previewBox.classList.remove("show");
+    previewModeBanner.classList.remove("show");
+    addPeakPreview.innerHTML = "";
+    addPeakPreview.classList.remove("show");
 
     if (peakInput) {
       peakInput.value = "";
@@ -163,10 +166,10 @@ function showPreview(peakData) {
     return;
   }
 
-  previewBanner.classList.add("show");
-  previewBox.classList.add("show");
+  previewModeBanner.classList.add("show");
+  addPeakPreview.classList.add("show");
 
-  previewBox.innerHTML = `
+  addPeakPreview.innerHTML = `
   <h5 class="muted">Peak to add</h5>
     ${
       dateInput.value
@@ -210,13 +213,13 @@ peakInput.addEventListener("input", () => {
   clearTimeout(debounceTimer);
 
   if (query.length < 2) {
-    suggestions.innerHTML = "";
-    suggestions.classList.remove("show"); // hide suggestions
+    peakSuggestions.innerHTML = "";
+    peakSuggestions.classList.remove("show"); // hide peakSuggestions
     return;
   }
 
   debounceTimer = setTimeout(async () => {
-    suggestions.innerHTML = "";
+    peakSuggestions.innerHTML = "";
 
     try {
       const res = await fetch(
@@ -227,9 +230,9 @@ peakInput.addEventListener("input", () => {
       const results = await res.json();
 
       if (results.length > 0) {
-        suggestions.classList.add("show"); // show suggestions
+        peakSuggestions.classList.add("show"); // show peakSuggestions
       } else {
-        suggestions.classList.remove("show");
+        peakSuggestions.classList.remove("show");
       }
 
       for (const r of results.slice(0, 5)) {
@@ -248,8 +251,8 @@ peakInput.addEventListener("input", () => {
             r.address.city || r.address.town || r.address.village || "";
           peakInput.dataset.state = r.address.state || "";
 
-          suggestions.innerHTML = "";
-          suggestions.classList.remove("show"); // hide after selection
+          peakSuggestions.innerHTML = "";
+          peakSuggestions.classList.remove("show"); // hide after selection
 
           showPreview({
             name: r.display_name,
@@ -260,19 +263,19 @@ peakInput.addEventListener("input", () => {
             state: peakInput.dataset.state,
           });
         });
-        suggestions.appendChild(li);
+        peakSuggestions.appendChild(li);
       }
     } catch (err) {
       console.error("Autocomplete error:", err);
-      suggestions.classList.remove("show");
+      peakSuggestions.classList.remove("show");
     }
   }, 300);
 });
 
-// Close suggestions if clicking outside
+// Close peakSuggestions if clicking outside
 document.addEventListener("click", (e) => {
-  if (!suggestions.contains(e.target) && e.target !== peakInput) {
-    suggestions.classList.remove("show");
+  if (!peakSuggestions.contains(e.target) && e.target !== peakInput) {
+    peakSuggestions.classList.remove("show");
   }
 });
 
@@ -326,7 +329,7 @@ function processQueue() {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  previewBox.classList.remove("show");
+  addPeakPreview.classList.remove("show");
   const name = peakInput.value.trim();
   const date = dateInput.value;
   let elevation = elevationInput.value
@@ -394,8 +397,8 @@ function init() {
   renderUserMarkers();
 
   // Ensure hidden by default on load
-  suggestions.classList.remove("show");
-  previewBox.classList.remove("show");
+  peakSuggestions.classList.remove("show");
+  addPeakPreview.classList.remove("show");
   // Optional: center map to a neutral view
   map.setView([39.5, -98.35], 4.5);
 }

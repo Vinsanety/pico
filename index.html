@@ -36,7 +36,7 @@
 
         <div class="counts">
           <div class="chip">
-            <strong>Your Summits:</strong> <span id="peak-count">0</span>
+            <strong>Your Summits:</strong> <span id="my-peak-count">0</span>
           </div>
         </div>
 
@@ -57,7 +57,7 @@
                 placeholder="Start typing a peak…"
                 autocomplete="off"
               />
-              <ul id="suggestions"></ul>
+              <ul id="peak-suggestions"></ul>
             </div>
 
             <!-- Elevation Input -->
@@ -71,20 +71,22 @@
             </div>
           </div>
 
-          <!-- Preview Data before clickign submit button -->
-          <div id="peak-preview"></div>
+          <!-- Preview Data before clicking submit button -->
+          <div id="add-peak-preview"></div>
 
           <!-- Submit Button -->
           <button type="submit">Add peak</button>
         </form>
 
         <h2 class="muted" style="margin-top: 16px">My peaks</h2>
-        <ul id="peaks"></ul>
+        <ul id="my-peaks"></ul>
       </aside>
 
       <!-- Map -->
       <div id="map">
-        <div id="preview-banner">🔍 Preview Mode — Click to exit</div>
+        <button id="preview-mode-banner" type="button">
+          🔍 Preview Mode — Click to exit
+        </button>
       </div>
     </div>
 
