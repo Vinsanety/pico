@@ -7,6 +7,7 @@
   --accent-dim: #065f46;
   --red: #ef4444;
   --border: #1f2937;
+  --transition-all: all 0.25s ease;
 }
 
 *,
@@ -367,13 +368,67 @@ ul#my-peaks li span.elevation {
   color: var(--text);
 }
 
+/* == MAP: Zoom Controls == */
+.leaflet-control-zoom {
+  background: var(--panel);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text);
+}
+
+/* Zoom buttons */
+.leaflet-control-zoom.leaflet-bar a {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  transition: var(--transition-all);
+}
+
+/* Top button (+) gets rounded top corners only */
+.leaflet-control-zoom.leaflet-bar a.leaflet-control-zoom-in {
+  border-radius: 6px 6px 0 0;
+}
+
+/* Bottom button (–) gets rounded bottom corners only */
+.leaflet-control-zoom.leaflet-bar a.leaflet-control-zoom-out {
+  border-radius: 0 0 6px 6px;
+}
+
+.leaflet-control-zoom a:hover,
+.leaflet-control-zoom a:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.6);
+  color: var(--accent);
+  background: var(--panel);
+}
+
+.leaflet-control-zoom a:active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: none;
+}
+
+/* == MAP: Custom Pin/Marker == */
 .custom-marker {
   position: relative;
   width: 0;
   height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-bottom: 20px solid var(--bg);
+  border-bottom: 20px solid var(--accent);
   cursor: pointer;
   transition: var(--transition-all);
 }
@@ -387,7 +442,7 @@ ul#my-peaks li span.elevation {
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-bottom: 24px solid var(--accent);
+  border-bottom: 24px solid var(--bg);
   z-index: -1;
 }
 
@@ -411,7 +466,8 @@ ul#my-peaks li span.elevation {
 
 .custom-marker:hover::before,
 .custom-marker:focus::before {
-  border-color: var(--panel);
+  border: 20px solid var(--accent);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.45);
 }
 
@@ -420,19 +476,24 @@ ul#my-peaks li span.elevation {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
 }
 
+/* == Map: Mark Cluster == */
 .marker-cluster {
-  background: color-mix(in srgb, var(--panel) 70%, transparent);
-  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  transition: var(--transition-all);
 }
 
 .marker-cluster div {
-  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
   color: var(--text);
+}
+
+.marker-cluster:focus {
+  outline: none;
 }
 
 .marker-cluster:hover,
 .marker-cluster:focus {
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
   color: var(--bg);
 }
 
@@ -452,6 +513,7 @@ ul#my-peaks li span.elevation {
   color: var(--text);
 }
 
+/* ===== TOAST ===== */
 #toast-container {
   position: fixed;
   bottom: 50px;
