@@ -106,15 +106,30 @@ function formatDateUS(isoDateStr) {
 }
 
 // ===== Map Setup =====
+var mapCenterPoint = [39.5, -107.35];
+
 function initMap() {
   map = L.map("map", {
-    center: [39.5, -98.35],
+    center: mapCenterPoint,
     zoom: 4.5,
   });
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
+    noWrap: true,
+    bounds: [
+      [-90, -180],
+      [90, 180],
+    ],
+    minZoom: 2, // prevent zooming out too far
+    maxZoom: 18, // prevent zooming in beyond tile availability
   }).addTo(map);
+
+  // Lock panning to the world bounds
+  map.setMaxBounds([
+    [-90, -180],
+    [90, 180],
+  ]);
 
   userMarkersCluster = L.markerClusterGroup();
   map.addLayer(userMarkersCluster);
@@ -400,7 +415,7 @@ function init() {
   peakSuggestions.classList.remove("show");
   addPeakPreview.classList.remove("show");
   // Optional: center map to a neutral view
-  map.setView([39.5, -98.35], 4.5);
+  map.setView(mapCenterPoint, 4.5);
 }
 
 init();
