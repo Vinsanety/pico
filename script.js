@@ -106,11 +106,13 @@ function formatDateUS(isoDateStr) {
 }
 
 // ===== Map Setup =====
-var mapCenterPoint = [39.5, -107.35];
+var usaBounds = [
+  [24.396308, -125.0],
+  [49.384358, -66.93457],
+];
 
 function initMap() {
   map = L.map("map", {
-    center: mapCenterPoint,
     zoom: 4.5,
   });
 
@@ -130,6 +132,12 @@ function initMap() {
     [-90, -180],
     [90, 180],
   ]);
+
+  // Keep it responsive: refit on resize
+  window.addEventListener("resize", function () {
+    map.invalidateSize();
+    map.fitBounds(usaBounds);
+  });
 
   userMarkersCluster = L.markerClusterGroup();
   map.addLayer(userMarkersCluster);
@@ -415,7 +423,7 @@ function init() {
   peakSuggestions.classList.remove("show");
   addPeakPreview.classList.remove("show");
   // Optional: center map to a neutral view
-  map.setView(mapCenterPoint, 4.5);
+  map.fitBounds(usaBounds);
 }
 
 init();
