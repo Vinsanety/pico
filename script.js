@@ -81,7 +81,7 @@ function renderPeaks() {
 /* ===Date Input=== */
 dateInput.addEventListener("input", () => {
   if (addPeakPreview.classList.contains("show")) {
-    // Grab the last peakData shown (you can store it globally when calling showPreview)
+    // Grab the last peakData shown (you can store it globally when calling showAddPeakPreview)
     const currentPeak = {
       name: peakInput.value,
       city: peakInput.dataset.city || "",
@@ -90,7 +90,7 @@ dateInput.addEventListener("input", () => {
       lat: peakInput.dataset.lat || null,
       lon: peakInput.dataset.lon || null,
     };
-    showPreview(currentPeak);
+    showAddPeakPreview(currentPeak);
   }
 });
 
@@ -106,11 +106,13 @@ function formatDateUS(isoDateStr) {
 }
 
 // ===== Map Setup =====
-var mapCenterPoint = [39.5, -107.35];
+var usaBounds = [
+  [24.396308, -125.0],
+  [49.384358, -66.93457],
+];
 
 function initMap() {
   map = L.map("map", {
-    center: mapCenterPoint,
     zoom: 4.5,
   });
 
@@ -131,6 +133,12 @@ function initMap() {
     [90, 180],
   ]);
 
+  // Refit to USA on resize
+  window.addEventListener("resize", function () {
+    map.invalidateSize();
+    map.fitBounds(usaBounds);
+  });
+
   userMarkersCluster = L.markerClusterGroup();
   map.addLayer(userMarkersCluster);
 }
@@ -138,28 +146,67 @@ function initMap() {
 function renderUserMarkers() {
   userMarkersCluster.clearLayers();
   peaks.forEach((peak) => {
+    let peakNameOnly = peak.name.split(",")[0];
     if (peak.lat && peak.lon) {
+      const popupHtml = `
+      <div class="peak-popup">
+      <h5 class="peak-popup-heading">Saved peak</h5>
+      <p class="peak-popup-data">
+          <span class="peak-popup-label">Summit</span>
+          <span class="peak-popup-value">${peakNameOnly}</span>
+        </p>
+        ${
+          peak.elevation
+            ? `<p class="peak-popup-data">
+                <span class="peak-popup-label">Elevation</span>
+                <span class="peak-popup-value">${peak.elevation} ft</span>
+                </p>`
+            : ""
+        }
+        ${
+          peak.date
+            ? `<p class="peak-popup-data">
+                <span class="peak-popup-label">Latest</span>
+                <span class="peak-popup-value">${formatDateUS(peak.date)}</span>
+              </p>`
+            : ""
+        }
+        </div>
+      `;
+
       const marker = L.marker([peak.lat, peak.lon], {
         icon: L.divIcon({
           className: "custom-marker",
           iconSize: [24, 24],
           iconAnchor: [12, 12],
         }),
-      }).bindPopup(
-        `<strong>${peak.name}</strong><br> 
-        ${peak.city ? peak.city + ", " : ""}
-        ${peak.state || ""}<br> 
-        ${peak.elevation ? `Elevation: ${peak.elevation} ft` : ""}`
-      );
+      }).bindPopup(popupHtml);
+
       userMarkersCluster.addLayer(marker);
     }
   });
 }
 
-// ===== Live Preview =====
-previewModeBanner.addEventListener("click", () => showPreview(null));
+// ===== Shared Summit Filter =====
+function filterSummits(results) {
+  const summitTypes = [
+    "peak",
+    "volcano",
+    "hill",
+    "mountain",
+    "ridge",
+    "summit",
+  ];
 
-function showPreview(peakData) {
+  return results.filter(
+    (r) => r.class === "natural" && summitTypes.includes(r.type)
+  );
+}
+
+// ===== Live Preview =====
+previewModeBanner.addEventListener("click", () => showAddPeakPreview(null));
+
+function showAddPeakPreview(peakData) {
   if (!peakData) {
     previewModeBanner.classList.remove("show");
     addPeakPreview.innerHTML = "";
@@ -177,7 +224,7 @@ function showPreview(peakData) {
       map.removeLayer(previewMarker);
       previewMarker = null;
     }
-    map.setView([20, 0], 2);
+    map.fitBounds(usaBounds);
     return;
   }
 
@@ -215,9 +262,30 @@ function showPreview(peakData) {
     if (previewMarker) map.removeLayer(previewMarker);
     previewMarker = L.marker([peakData.lat, peakData.lon])
       .addTo(map)
-      .bindPopup(`<strong>${peakData.name}</strong>`)
+      .bindPopup(
+        `<div class="peak-popup peak-popup-preview">
+          <h5 class="peak-popup-heading">Peak to add</h5>
+          <span class="peak-popup-preview-value">${peakData.name}</span>
+        </div>`
+      )
       .openPopup();
   }
+}
+
+// ===== Shared Summit Filter =====
+function filterSummits(results) {
+  const summitTypes = [
+    "peak",
+    "volcano",
+    "hill",
+    "mountain",
+    "ridge",
+    "summit",
+  ];
+
+  return results.filter(
+    (r) => r.class === "natural" && summitTypes.includes(r.type)
+  );
 }
 
 // ===== Typeahead Autocomplete (OSM + Elevation) =====
@@ -238,19 +306,21 @@ peakInput.addEventListener("input", () => {
 
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&q=${encodeURIComponent(
           query
         )}`
       );
-      const results = await res.json();
 
-      if (results.length > 0) {
+      const results = await res.json();
+      const peaksOnly = filterSummits(results);
+
+      if (peaksOnly.length > 0) {
         peakSuggestions.classList.add("show"); // show peakSuggestions
       } else {
         peakSuggestions.classList.remove("show");
       }
 
-      for (const r of results.slice(0, 5)) {
+      for (const r of peaksOnly.slice(0, 5)) {
         const li = document.createElement("li");
         li.textContent = r.display_name;
         li.addEventListener("click", async () => {
@@ -269,7 +339,7 @@ peakInput.addEventListener("input", () => {
           peakSuggestions.innerHTML = "";
           peakSuggestions.classList.remove("show"); // hide after selection
 
-          showPreview({
+          showAddPeakPreview({
             name: r.display_name,
             elevation: elev,
             lat,
@@ -367,23 +437,34 @@ form.addEventListener("submit", async (e) => {
   if (!lat || !lon) {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(
+        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&q=${encodeURIComponent(
           name
         )}`
       );
       const results = await res.json();
-      if (results.length > 0) {
-        lat = parseFloat(results[0].lat);
-        lon = parseFloat(results[0].lon);
-        city =
-          results[0].address.city ||
-          results[0].address.town ||
-          results[0].address.village ||
-          "";
-        state = results[0].address.state || "";
-        if (!elevation) {
-          elevation = await getElevationFromOSM(lat, lon);
-        }
+
+      const peaksOnly = filterSummits(results);
+
+      if (peaksOnly.length === 0) {
+        alert(
+          "That doesn't look like a summit. Please pick a peak, volcano, or hill."
+        );
+        return;
+      }
+
+      const best = peaksOnly[0];
+      lat = parseFloat(best.lat);
+      lon = parseFloat(best.lon);
+      city =
+        best.address.city ||
+        best.address.town ||
+        best.address.village ||
+        best.address.county ||
+        "";
+      state = best.address.state || best.address.region || "";
+
+      if (!elevation) {
+        elevation = await getElevationFromOSM(lat, lon);
       }
     } catch (err) {
       console.error("Geocoding error:", err);
@@ -402,7 +483,7 @@ form.addEventListener("submit", async (e) => {
   peakInput.dataset.elevation = "";
   peakInput.dataset.city = "";
   peakInput.dataset.state = "";
-  showPreview(null);
+  showAddPeakPreview(null);
 });
 
 // ===== Start App =====
@@ -410,12 +491,10 @@ function init() {
   initMap();
   renderPeaks();
   renderUserMarkers();
-
   // Ensure hidden by default on load
   peakSuggestions.classList.remove("show");
   addPeakPreview.classList.remove("show");
-  // Optional: center map to a neutral view
-  map.setView(mapCenterPoint, 4.5);
+  map.fitBounds(usaBounds);
 }
 
 init();
