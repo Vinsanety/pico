@@ -1,3 +1,11 @@
+.prototype-banner {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 :root {
   --bg: #0f172a;
   --panel: #111827;
@@ -31,7 +39,10 @@ body {
 .app {
   display: grid;
   grid-template-columns: 360px 1fr;
-  grid-template-rows: calc(100vh - 32px);
+  /* grid-template-rows: calc(
+    100vh - 32px
+  ); // correct height without prototype-banner */
+  grid-template-rows: calc(100vh - 69px); // height WITH prototype-banner
 }
 
 aside {
