@@ -6,7 +6,7 @@ const peakInput = document.getElementById("peak-input");
 const peakSuggestions = document.getElementById("peak-suggestions");
 const elevationInput = document.getElementById("peak-elevation");
 const addPeakPreview = document.getElementById("add-peak-preview");
-const myPeaksList = document.getElementById("my-summits");
+const mySummitsList = document.getElementById("my-summits");
 const previewModeBanner = document.getElementById("preview-mode-banner");
 
 // ===== State =====
@@ -52,7 +52,7 @@ function savePeaks() {
 }
 
 function renderPeaks() {
-  myPeaksList.innerHTML = "";
+  mySummitsList.innerHTML = "";
   peaks.forEach((peak, index) => {
     const li = document.createElement("li");
     li.textContent = `${peak.name}${peak.city ? " - " + peak.city : ""}${
@@ -73,7 +73,7 @@ function renderPeaks() {
     };
 
     li.appendChild(delBtn);
-    myPeaksList.appendChild(li);
+    mySummitsList.appendChild(li);
   });
   myPeakCount.textContent = peaks.length;
 }
