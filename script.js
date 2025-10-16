@@ -6,7 +6,7 @@ const peakInput = document.getElementById("peak-input");
 const peakSuggestions = document.getElementById("peak-suggestions");
 const elevationInput = document.getElementById("peak-elevation");
 const addPeakPreview = document.getElementById("add-peak-preview");
-const myPeaksList = document.getElementById("my-peaks");
+const myPeaksList = document.getElementById("my-summits");
 const previewModeBanner = document.getElementById("preview-mode-banner");
 
 // ===== State =====
@@ -64,7 +64,7 @@ function renderPeaks() {
     delBtn.textContent = "\u2715";
     delBtn.onclick = () => {
       if (confirm(`Are you sure you want to Delete ${peak.name}?`)) {
-        peaks.splice(index, 1);
+        peaks = peaks.filter((p) => p.name !== peak.name);
         savePeaks();
         renderPeaks();
         renderUserMarkers();
@@ -150,15 +150,15 @@ function renderUserMarkers() {
     if (peak.lat && peak.lon) {
       const popupHtml = `
       <div class="peak-popup">
-      <h5 class="peak-popup-heading">Saved peak</h5>
+      <h5 class="peak-popup-heading">Logged Summit</h5>
       <p class="peak-popup-data">
-          <span class="peak-popup-label">Summit</span>
+          <span class="peak-popup-label">📍&nbsp;Summit</span>
           <span class="peak-popup-value">${peakNameOnly}</span>
         </p>
         ${
           peak.elevation
             ? `<p class="peak-popup-data">
-                <span class="peak-popup-label">Elevation</span>
+                <span class="peak-popup-label">↗️&nbsp;Elevation</span>
                 <span class="peak-popup-value">${peak.elevation} ft</span>
                 </p>`
             : ""
@@ -166,7 +166,7 @@ function renderUserMarkers() {
         ${
           peak.date
             ? `<p class="peak-popup-data">
-                <span class="peak-popup-label">Latest</span>
+                <span class="peak-popup-label">🗓&nbsp;Latest</span>
                 <span class="peak-popup-value">${formatDateUS(peak.date)}</span>
               </p>`
             : ""
@@ -297,12 +297,19 @@ peakInput.addEventListener("input", () => {
 
   if (query.length < 2) {
     peakSuggestions.innerHTML = "";
-    peakSuggestions.classList.remove("show"); // hide peakSuggestions
+    peakSuggestions.classList.remove("show");
     return;
   }
 
   debounceTimer = setTimeout(async () => {
     peakSuggestions.innerHTML = "";
+
+    // Show spinner while fetching
+    const spinner = document.createElement("li");
+    spinner.className = "spinner";
+    spinner.textContent = "Loading...";
+    peakSuggestions.appendChild(spinner);
+    peakSuggestions.classList.add("show");
 
     try {
       const res = await fetch(
@@ -313,45 +320,51 @@ peakInput.addEventListener("input", () => {
 
       const results = await res.json();
       const peaksOnly = filterSummits(results);
+      peakSuggestions.innerHTML = "";
 
       if (peaksOnly.length > 0) {
-        peakSuggestions.classList.add("show"); // show peakSuggestions
-      } else {
-        peakSuggestions.classList.remove("show");
-      }
+        peakSuggestions.classList.add("show");
 
-      for (const r of peaksOnly.slice(0, 5)) {
-        const li = document.createElement("li");
-        li.textContent = r.display_name;
-        li.addEventListener("click", async () => {
-          const lat = parseFloat(r.lat);
-          const lon = parseFloat(r.lon);
-          const elev = await getElevationFromOSM(lat, lon);
+        for (const r of peaksOnly.slice(0, 5)) {
+          const li = document.createElement("li");
+          li.textContent = r.display_name;
+          li.addEventListener("click", async () => {
+            const lat = parseFloat(r.lat);
+            const lon = parseFloat(r.lon);
+            const elev = await getElevationFromOSM(lat, lon);
 
-          peakInput.value = r.display_name;
-          peakInput.dataset.lat = lat;
-          peakInput.dataset.lon = lon;
-          peakInput.dataset.elevation = elev || "";
-          peakInput.dataset.city =
-            r.address.city || r.address.town || r.address.village || "";
-          peakInput.dataset.state = r.address.state || "";
+            peakInput.value = r.display_name;
+            peakInput.dataset.lat = lat;
+            peakInput.dataset.lon = lon;
+            peakInput.dataset.elevation = elev || "";
+            peakInput.dataset.city =
+              r.address.city || r.address.town || r.address.village || "";
+            peakInput.dataset.state = r.address.state || "";
 
-          peakSuggestions.innerHTML = "";
-          peakSuggestions.classList.remove("show"); // hide after selection
+            peakSuggestions.innerHTML = "";
+            peakSuggestions.classList.remove("show");
 
-          showAddPeakPreview({
-            name: r.display_name,
-            elevation: elev,
-            lat,
-            lon,
-            city: peakInput.dataset.city,
-            state: peakInput.dataset.state,
+            showAddPeakPreview({
+              name: r.display_name,
+              elevation: elev,
+              lat,
+              lon,
+              city: peakInput.dataset.city,
+              state: peakInput.dataset.state,
+            });
           });
-        });
-        peakSuggestions.appendChild(li);
+          peakSuggestions.appendChild(li);
+        }
+      } else {
+        const noRes = document.createElement("li");
+        noRes.className = "no-results";
+        noRes.textContent = "No summit found";
+        peakSuggestions.appendChild(noRes);
+        peakSuggestions.classList.add("show");
       }
     } catch (err) {
       console.error("Autocomplete error:", err);
+      peakSuggestions.innerHTML = "";
       peakSuggestions.classList.remove("show");
     }
   }, 300);

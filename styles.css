@@ -215,7 +215,7 @@ button[type="submit"]:active {
 }
 
 ul#peak-suggestions,
-ul#my-peaks {
+ul#my-summits {
   list-style: none;
   padding: 0;
   margin: 8px 0 0;
@@ -225,7 +225,7 @@ ul#my-peaks {
 }
 
 ul#peak-suggestions li,
-ul#my-peaks li {
+ul#my-summits li {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -235,7 +235,7 @@ ul#my-peaks li {
 }
 
 ul#peak-suggestions li:last-child,
-ul#my-peaks li:last-child {
+ul#my-summits li:last-child {
   border-bottom: none;
 }
 
@@ -248,9 +248,44 @@ ul#peak-suggestions li:hover {
   background: #0f1a30;
 }
 
-ul#my-peaks li span.elevation {
+ul#my-summits li span.elevation {
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Loading Spinner inside autocomplete dropdown */
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  font-size: 1rem;
+  color: var(--muted);
+}
+.spinner::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  border: 2px solid var(--accent);
+  border-top-color: var(--accent-dim);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.no-results {
+  padding: 6px;
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+}
+.no-results:hover {
+  background: none;
+  cursor: pointer;
 }
 
 #add-peak-preview {
