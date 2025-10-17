@@ -77,7 +77,7 @@ function savePeaks() {
 /* ===== My Summits - List (last 5) ===== */
 function renderRecentSummitsList() {
   mySummitsList.innerHTML = "";
-  const recentPeaks = peaks.slice(-5);
+  const recentPeaks = peaks.slice(-5).reverse();
 
   recentPeaks.forEach((peak, index) => {
     const li = document.createElement("li");

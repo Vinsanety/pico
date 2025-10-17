@@ -105,7 +105,7 @@ header .header-logo {
 
 /* ===== TABLE VIEW ===== */
 #my-summits-table {
-  padding: 2rem;
+  margin: 2rem;
 }
 .summits-table {
   display: block;
