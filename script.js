@@ -1,4 +1,4 @@
-// ===== DOM Elements =====
+/* ===== DOM Elements ===== */
 const form = document.getElementById("peak-form");
 const myPeakCount = document.getElementById("my-peak-count");
 const dateInput = document.getElementById("peak-date");
@@ -13,13 +13,14 @@ const mySummitsList = document.getElementById("recent-summits-list");
 const mapRadio = document.getElementById("map-view-radio");
 const tableRadio = document.getElementById("table-view-radio");
 
-// ===== State =====
+/* ===== State ===== */
 let peaks = JSON.parse(localStorage.getItem("peaks")) || [];
 let map;
 let userMarkersCluster;
 let previewMarker = null;
 let showingTable = false;
 
+/* ===== Map/Table Toggle ===== */
 mapRadio.addEventListener("change", () => {
   if (mapRadio.checked) {
     mySummitsTable.classList.remove("active");
@@ -28,7 +29,6 @@ mapRadio.addEventListener("change", () => {
     showingTable = false;
   }
 });
-
 tableRadio.addEventListener("change", () => {
   if (tableRadio.checked) {
     mapView.classList.remove("active");
@@ -38,6 +38,7 @@ tableRadio.addEventListener("change", () => {
   }
 });
 
+/* ===== OSM Elevation API Fetch  ===== */
 async function getElevationFromOSM(lat, lon) {
   // Overpass query: find nodes/ways with ele=* within ~100m of the point
   const query = `
@@ -57,7 +58,6 @@ async function getElevationFromOSM(lat, lon) {
     if (data.elements && data.elements.length > 0) {
       const eleTag = data.elements[0].tags.ele;
       if (eleTag) {
-        // Try to parse as number
         const meters = parseFloat(eleTag);
         if (!isNaN(meters)) {
           return Math.round(meters * 3.28084); // feet
@@ -74,7 +74,7 @@ function savePeaks() {
   localStorage.setItem("peaks", JSON.stringify(peaks));
 }
 
-/* ===My Summits - List (last 5)=== */
+/* ===== My Summits - List (last 5) ===== */
 function renderRecentSummitsList() {
   mySummitsList.innerHTML = "";
   const recentPeaks = peaks.slice(-5);
@@ -104,7 +104,7 @@ function renderRecentSummitsList() {
   myPeakCount.textContent = peaks.length;
 }
 
-/* ===My Summits - Table=== */
+/* ===== My Summits - Table ===== */
 function renderMySummitsTable() {
   mySummitsTable.innerHTML = "";
 
@@ -149,7 +149,6 @@ function renderMySummitsTable() {
     };
     actionTd.appendChild(delBtn);
     tr.appendChild(actionTd);
-
     tbody.appendChild(tr);
   });
 
@@ -157,7 +156,7 @@ function renderMySummitsTable() {
   mySummitsTable.appendChild(table);
 }
 
-/* ===Date Input=== */
+/* ===== Date Input ===== */
 dateInput.addEventListener("input", () => {
   if (addPeakPreview.classList.contains("show")) {
     // Grab the last peakData shown (you can store it globally when calling showAddPeakPreview)
@@ -173,6 +172,7 @@ dateInput.addEventListener("input", () => {
   }
 });
 
+/* ===== Format Date Helper Function ===== */
 function formatDateUS(isoDateStr) {
   if (!isoDateStr) return "";
   const [year, month, day] = isoDateStr.split("-").map(Number);
@@ -184,7 +184,7 @@ function formatDateUS(isoDateStr) {
   });
 }
 
-// ===== Map Setup =====
+/* ===== Map Setup ===== */
 var usaBounds = [
   [24.396308, -125.0],
   [49.384358, -66.93457],
@@ -222,6 +222,7 @@ function initMap() {
   map.addLayer(userMarkersCluster);
 }
 
+/* ===== Render Map Markers ===== */
 function renderMapMarkers() {
   userMarkersCluster.clearLayers();
   peaks.forEach((peak) => {
@@ -266,7 +267,7 @@ function renderMapMarkers() {
   });
 }
 
-// ===== Shared Summit Filter =====
+/* ===== Shared Summit Filter ===== */
 function filterSummits(results) {
   const summitTypes = [
     "peak",
@@ -282,7 +283,7 @@ function filterSummits(results) {
   );
 }
 
-// ===== Live Preview =====
+/* ===== Map Live Preview ===== */
 previewModeBanner.addEventListener("click", () => showAddPeakPreview(null));
 
 function showAddPeakPreview(peakData) {
@@ -351,7 +352,7 @@ function showAddPeakPreview(peakData) {
   }
 }
 
-// ===== Shared Summit Filter =====
+/* ===== Shared Summit Filter ===== */
 function filterSummits(results) {
   const summitTypes = [
     "peak",
@@ -367,7 +368,7 @@ function filterSummits(results) {
   );
 }
 
-// ===== Typeahead Autocomplete (OSM + Elevation) =====
+/* ===== Typeahead Autocomplete (OSM + Elevation) ===== */
 let debounceTimer;
 
 peakInput.addEventListener("input", () => {
@@ -382,7 +383,6 @@ peakInput.addEventListener("input", () => {
 
   debounceTimer = setTimeout(async () => {
     peakSuggestions.innerHTML = "";
-
     // Show spinner while fetching
     const spinner = document.createElement("li");
     spinner.className = "spinner";
@@ -448,7 +448,6 @@ peakInput.addEventListener("input", () => {
     }
   }, 300);
 });
-
 // Close peakSuggestions if clicking outside
 document.addEventListener("click", (e) => {
   if (!peakSuggestions.contains(e.target) && e.target !== peakInput) {
@@ -456,7 +455,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// ===== Toast Message =====
+/* ===== Toast Message ===== */
 let toastIdCounter = 0;
 const toastQueue = [];
 let activeToasts = 0;
@@ -502,7 +501,7 @@ function processQueue() {
   }, 5000);
 }
 
-// ===== Form Submission =====
+/* ===== Form Submission ===== */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -578,7 +577,7 @@ form.addEventListener("submit", async (e) => {
   showAddPeakPreview(null);
 });
 
-// ===== Start App =====
+/* ===== Start App ===== */
 function init() {
   initMap();
   renderRecentSummitsList();
