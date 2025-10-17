@@ -20,6 +20,26 @@ let userMarkersCluster;
 let previewMarker = null;
 let showingTable = false;
 
+/* ===== Helper Functions ===== */
+function formatPeakName(name) {
+  return name.split(",")[0];
+}
+
+function getLocationFromPeakName(fullName) {
+  return fullName.split(", ").slice(1).join(", ");
+}
+
+function formatDateUS(isoDateStr) {
+  if (!isoDateStr) return "";
+  const [year, month, day] = isoDateStr.split("-").map(Number);
+  const dateObj = new Date(year, month - 1, day);
+  return dateObj.toLocaleDateString("en-US", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 /* ===== Map/Table Toggle ===== */
 mapRadio.addEventListener("change", () => {
   if (mapRadio.checked) {
@@ -79,11 +99,16 @@ function renderRecentSummitsList() {
   mySummitsList.innerHTML = "";
   const recentPeaks = peaks.slice(-5).reverse();
 
-  recentPeaks.forEach((peak, index) => {
+  recentPeaks.forEach((peak) => {
     const li = document.createElement("li");
-    li.textContent = `${peak.name}${peak.city ? " - " + peak.city : ""}${
-      peak.elevation ? " - " + peak.elevation + " ft" : ""
-    }`;
+    li.innerHTML = `
+      <div>
+        <span>${formatPeakName(peak.name)}</span>
+        <span class="muted">${
+          peak.date ? " on " + formatDateUS(peak.date) : ""
+        }</span>
+      </div>
+    `;
 
     const delBtn = document.createElement("button");
     delBtn.className = "delete-btn";
@@ -115,6 +140,7 @@ function renderMySummitsTable() {
   thead.innerHTML = `
     <tr>
       <th>Name</th>
+      <th>Location</th>
       <th>Elevation (ft)</th>
       <th>Date</th>
       <th>Actions</th>
@@ -128,9 +154,10 @@ function renderMySummitsTable() {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${peak.name}</td>
-      <td>${peak.elevation ? peak.elevation + " ft" : ""}</td>
-      <td>${peak.date ? formatDateUS(peak.date) : ""}</td>
+      <td>${formatPeakName(peak.name)}</td>
+      <td>${getLocationFromPeakName(peak.name)}</td>
+      <td>${peak.elevation ? peak.elevation + " ft" : " - "}</td>
+      <td>${peak.date ? formatDateUS(peak.date) : " - "}</td>
     `;
 
     const actionTd = document.createElement("td");
@@ -171,18 +198,6 @@ dateInput.addEventListener("input", () => {
     showAddPeakPreview(currentPeak);
   }
 });
-
-/* ===== Format Date Helper Function ===== */
-function formatDateUS(isoDateStr) {
-  if (!isoDateStr) return "";
-  const [year, month, day] = isoDateStr.split("-").map(Number);
-  const dateObj = new Date(year, month - 1, day);
-  return dateObj.toLocaleDateString("en-US", {
-    month: "numeric",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 /* ===== Map Setup ===== */
 var usaBounds = [
@@ -226,14 +241,13 @@ function initMap() {
 function renderMapMarkers() {
   userMarkersCluster.clearLayers();
   peaks.forEach((peak) => {
-    let peakNameOnly = peak.name.split(",")[0];
     if (peak.lat && peak.lon) {
       const popupHtml = `
       <div class="peak-popup">
       <h5 class="peak-popup-heading">Logged Summit</h5>
       <p class="peak-popup-data">
           <span class="peak-popup-label">📍&nbsp;Summit</span>
-          <span class="peak-popup-value">${peakNameOnly}</span>
+          <span class="peak-popup-value">${formatPeakName(peak.name)}</span>
         </p>
         ${
           peak.elevation
