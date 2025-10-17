@@ -34,8 +34,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- Prototype banner -->
-    <div class="prototype-banner">⚠️ Prototype Demo — Work in Progress ⚠️</div>
+    <div class="banner">⚠️ Prototype Demo — Work in Progress ⚠️</div>
 
     <div class="app">
       <!-- Sidebar -->
@@ -89,24 +88,42 @@
 
         <hr style="margin-top: 2rem" />
 
-        <h3 style="margin-top: 2rem">My Summits</h3>
-        <div class="chip">
-          <strong>Total Summits:</strong>
-          <span id="my-peak-count">-</span>
+        <div class="my-summits-container">
+          <h3 class="my-summits-heading">
+            <strong>Total Summits:&nbsp;</strong>
+            <span id="my-peak-count">-</span>
+          </h3>
+
+          <!-- Map/Table Toggle Button -->
+          <div class="toggle-container">
+            <input type="radio" id="map-view-radio" name="view" checked />
+            <label for="map-view-radio">Map</label>
+
+            <input type="radio" id="table-view-radio" name="view" />
+            <label for="table-view-radio">Table</label>
+          </div>
+
+          <!-- Recent Summits List (last 5 logged)-->
+          <span>Recent Logged Summits</span>
+          <ul id="recent-summits-list"></ul>
         </div>
-        <ul id="my-summits"></ul>
       </aside>
 
-      <!-- Map -->
-      <div id="map">
-        <button id="preview-mode-banner" type="button">
-          🔍 Preview Mode — Click to exit
-        </button>
-      </div>
-    </div>
+      <div id="view-wrapper">
+        <!-- Map View -->
+        <div id="map" class="view active">
+          <button id="preview-mode-banner" type="button">
+            🔍 Preview Mode — Click to exit
+          </button>
+        </div>
 
-    <!-- Toast Message -->
-    <div id="toast-container"></div>
+        <!-- Table View -->
+        <div id="my-summits-table" class="view"></div>
+      </div>
+
+      <!-- Toast Message -->
+      <div id="toast-container"></div>
+    </div>
 
     <footer>
       <p class="copyright">&copy; 2025 Vahala Designs</p>
