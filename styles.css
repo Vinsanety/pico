@@ -1,19 +1,14 @@
-.prototype-banner {
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 :root {
   --bg: #0f172a;
   --panel: #111827;
   --text: #e5e7eb;
   --text-dark: var(--bg);
   --muted: #9ca3af;
-  --accent: #34d399;
-  --accent-dim: #065f46;
+  --primary: #34d399;
+  --primary-dim: #065f46;
+  --secondary: #3d5a73;
+  --accent: #f0b429;
+  --accent-dim: #d89c1f;
   --red: #ef4444;
   --border: #1f2937;
   --transition-all: all 0.25s ease;
@@ -36,37 +31,91 @@ body {
     "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
+/* Remove after release? */
+.banner {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===== ENTIRE APP ===== */
 .app {
   display: grid;
   grid-template-columns: 360px 1fr;
   /* grid-template-rows: calc(
     100vh - 32px
-  ); // correct height without prototype-banner */
-  grid-template-rows: calc(100vh - 69px); // height WITH prototype-banner
+  ); // correct height without .banner */
+  grid-template-rows: calc(100vh - 69px); // height WITH .banner
 }
 
+/* ===== ASIDE / FORM ===== */
 aside {
   background: var(--panel);
   border-right: 1px solid var(--border);
   padding: 16px;
   overflow-y: auto;
 }
-
-header {
+aside header {
   background: var(--panel);
   text-align: center;
   padding: 1rem;
   border-bottom: 1px solid var(--border);
 }
-
-.header-logo {
+header .header-logo {
   max-width: 240px;
   margin-bottom: 0.5rem;
 }
+.my-summits-heading {
+  display: inline-flex;
+  width: fit-content;
+  margin: 1rem 0 0.5rem;
+}
+.my-summits-heading strong {
+  color: var(--primary);
+}
 
+/* ===== MAIN VIEW (WRAPPER) ===== */
+#view-wrapper {
+  display: block;
+}
+.view {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  height: 0;
+  overflow: hidden;
+}
+.view.active {
+  opacity: 1;
+  transform: translateY(0);
+  height: auto;
+}
+
+/* ===== MAP VIEW ===== */
 #map {
   height: 100%;
   position: relative;
+}
+#map:not(.active) {
+  height: 0;
+}
+
+/* ===== TABLE VIEW ===== */
+#my-summits-table {
+  padding: 2rem;
+}
+.summits-table {
+  display: block;
+  width: 100%;
+  border-collapse: collapse;
+}
+.summits-table th,
+.summits-table td {
+  border: 1px solid var(--muted);
+  padding: 0.5rem 0.875rem;
 }
 
 @media (max-width: 667px) {
@@ -87,6 +136,38 @@ header {
   }
 }
 
+/* ===== VIEW TOGGLE SWITCH ===== */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1rem 1.5rem 2rem;
+  background: #e0e0e0;
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 0.375rem;
+}
+.toggle-container input {
+  display: none;
+}
+.toggle-container label {
+  flex: 1;
+  padding: 0.375rem;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  color: var(--text-dark);
+}
+#map-view-radio:checked + label,
+#table-view-radio:checked + label {
+  background: var(--accent);
+}
+#map-view-radio + label:hover,
+#table-view-radio + label:hover {
+  background: var(--accent-dim);
+}
+
 /* ===== HELPER CLASSES ===== */
 .muted {
   color: var(--muted);
@@ -100,19 +181,6 @@ header {
   gap: 1rem;
 }
 
-.chip {
-  width: fit-content;
-  margin: 1rem 0;
-  padding: 0.5rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 0.75rem;
-}
-
-.chip strong {
-  color: var(--accent);
-}
-
 .form-field label {
   display: block;
   font-size: 13px;
@@ -124,7 +192,7 @@ header {
 }
 
 .form-field:focus-within label {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 /* Base input styles */
@@ -156,7 +224,7 @@ input[type="number"]:hover {
 input[type="text"]:focus,
 input[type="date"]:focus,
 input[type="number"]:focus {
-  border-color: var(--accent);
+  border-color: var(--primary);
   background: #111b2d;
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.45);
 }
@@ -188,8 +256,8 @@ button[type="submit"] {
   margin-top: 2rem;
   padding: 14px 16px;
   border-radius: 8px;
-  border: 2px solid var(--accent);
-  background: var(--accent);
+  border: 2px solid var(--primary);
+  background: var(--primary);
   color: var(--text-dark);
   font-weight: 700;
   cursor: pointer;
@@ -206,9 +274,9 @@ button[type="submit"]:hover {
 
 button[type="submit"]:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.45);
-  background: var(--accent);
+  background: var(--primary);
   color: var(--text-dark);
 }
 
@@ -226,7 +294,7 @@ button[type="submit"]:active {
 }
 
 ul#peak-suggestions,
-ul#my-summits {
+ul#recent-summits-list {
   list-style: none;
   padding: 0;
   margin: 8px 0 0;
@@ -236,7 +304,7 @@ ul#my-summits {
 }
 
 ul#peak-suggestions li,
-ul#my-summits li {
+ul#recent-summits-list li {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -246,7 +314,7 @@ ul#my-summits li {
 }
 
 ul#peak-suggestions li:last-child,
-ul#my-summits li:last-child {
+ul#recent-summits-list li:last-child {
   border-bottom: none;
 }
 
@@ -259,8 +327,8 @@ ul#peak-suggestions li:hover {
   background: #0f1a30;
 }
 
-ul#my-summits li span.elevation {
-  color: var(--accent);
+ul#recent-summits-list li span.elevation {
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -278,8 +346,8 @@ ul#my-summits li span.elevation {
   width: 1rem;
   height: 1rem;
   margin-left: 0.5rem;
-  border: 2px solid var(--accent);
-  border-top-color: var(--accent-dim);
+  border: 2px solid var(--primary);
+  border-top-color: var(--primary-dim);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -304,7 +372,7 @@ ul#my-summits li span.elevation {
   margin-top: 1rem;
   padding: 1.5rem 1.25rem;
   border-radius: 10px;
-  border: 2px dotted var(--accent);
+  border: 2px dotted var(--primary);
   background: #111b2d;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
@@ -316,7 +384,7 @@ ul#my-summits li span.elevation {
 }
 
 #add-peak-preview h5 {
-  color: var(--accent);
+  color: var(--primary);
   margin: 0;
   font-size: 1rem;
 }
@@ -396,7 +464,7 @@ ul#my-summits li span.elevation {
 
 #preview-mode-banner:hover,
 #preview-mode-banner:focus {
-  border-color: var(--accent);
+  border-color: var(--primary);
   background: #111b2d;
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.45);
   transform: translateX(-50%) translateY(-2px);
@@ -406,8 +474,8 @@ ul#my-summits li span.elevation {
 #preview-mode-banner:active {
   transform: translateX(-50%) translateY(0);
   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
-  background: var(--accent-dim);
-  border-color: var(--accent);
+  background: var(--primary-dim);
+  border-color: var(--primary);
   color: var(--text);
 }
 
@@ -451,15 +519,15 @@ ul#my-summits li span.elevation {
 
 .leaflet-control-zoom a:hover,
 .leaflet-control-zoom a:focus {
-  border-color: var(--accent);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.6);
-  color: var(--accent);
+  color: var(--primary);
   background: var(--panel);
 }
 
 .leaflet-control-zoom a:active {
-  background: var(--accent-dim);
-  border-color: var(--accent);
+  background: var(--primary-dim);
+  border-color: var(--primary);
   color: var(--text);
   box-shadow: none;
 }
@@ -468,7 +536,7 @@ ul#my-summits li span.elevation {
 .leaflet-popup-content-wrapper {
   background: var(--panel);
   border-radius: 10px;
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--primary);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   color: var(--text);
   padding: 0 1rem;
@@ -480,7 +548,7 @@ ul#my-summits li span.elevation {
 }
 
 .leaflet-popup-content-wrapper:has(.peak-popup-preview) {
-  border: 2px dotted var(--accent);
+  border: 2px dotted var(--primary);
   background: #111b2d;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
@@ -500,7 +568,7 @@ ul#my-summits li span.elevation {
 }
 
 .peak-popup .peak-popup-heading {
-  color: var(--accent);
+  color: var(--primary);
   margin: 0 0 1rem;
   padding: 0;
   font-size: 1rem;
@@ -542,7 +610,7 @@ ul#my-summits li span.elevation {
   height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-bottom: 20px solid var(--accent);
+  border-bottom: 20px solid var(--primary);
   cursor: pointer;
   transition: var(--transition-all);
 }
@@ -580,13 +648,13 @@ ul#my-summits li span.elevation {
 
 .custom-marker:hover::before,
 .custom-marker:focus::before {
-  border: 20px solid var(--accent);
-  border-color: var(--accent);
+  border: 20px solid var(--primary);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.45);
 }
 
 .custom-marker:active::before {
-  border-color: var(--accent-dim);
+  border-color: var(--primary-dim);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
 }
 
@@ -607,23 +675,23 @@ ul#my-summits li span.elevation {
 
 .marker-cluster:hover,
 .marker-cluster:focus {
-  background: color-mix(in srgb, var(--accent) 80%, transparent);
+  background: color-mix(in srgb, var(--primary) 80%, transparent);
   color: var(--bg);
 }
 
 .marker-cluster:hover div,
 .marker-cluster:focus div {
-  background: var(--accent);
+  background: var(--primary);
   color: var(--bg);
 }
 
 .marker-cluster:active {
-  background: var(--accent-dim);
+  background: var(--primary-dim);
   color: var(--text);
 }
 
 .marker-cluster:active div {
-  background: var(--accent-dim);
+  background: var(--primary-dim);
   color: var(--text);
 }
 
@@ -657,7 +725,7 @@ ul#my-summits li span.elevation {
 }
 
 .toast.success {
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--primary);
 }
 
 .toast.destructive {
