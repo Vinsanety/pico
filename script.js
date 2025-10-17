@@ -118,6 +118,7 @@ function renderRecentSummitsList() {
         peaks = peaks.filter((p) => p.name !== peak.name);
         savePeaks();
         renderRecentSummitsList();
+        renderMySummitsTable();
         renderMapMarkers();
         showToast(`Removed ${peak.name}`, "destructive");
       }
@@ -156,7 +157,9 @@ function renderMySummitsTable() {
     tr.innerHTML = `
       <td>${formatPeakName(peak.name)}</td>
       <td>${getLocationFromPeakName(peak.name)}</td>
-      <td>${peak.elevation ? peak.elevation + " ft" : " - "}</td>
+      <td>${
+        peak.elevation.toLocaleString("en-US") ? peak.elevation + " ft" : " - "
+      }</td>
       <td>${peak.date ? formatDateUS(peak.date) : " - "}</td>
     `;
 
@@ -253,7 +256,9 @@ function renderMapMarkers() {
           peak.elevation
             ? `<p class="peak-popup-data">
                 <span class="peak-popup-label">↗️&nbsp;Elevation</span>
-                <span class="peak-popup-value">${peak.elevation} ft</span>
+                <span class="peak-popup-value">${peak.elevation.toLocaleString(
+                  "en-US"
+                )} ft</span>
                 </p>`
             : ""
         }
@@ -580,6 +585,7 @@ form.addEventListener("submit", async (e) => {
   peaks.push(peakData);
   savePeaks();
   renderRecentSummitsList();
+  renderMySummitsTable();
   renderMapMarkers();
   showToast(`Added ${name}`, "success");
   form.reset();
