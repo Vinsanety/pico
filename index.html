@@ -121,6 +121,25 @@
         <div id="my-summits-table" class="view"></div>
       </div>
 
+      <!-- Edit Peak Modal -->
+      <div id="edit-submission-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Edit Summit</h3>
+          <form id="edit-form">
+            <div class="form-field">
+              <label for="edit-peak-date">Date climbed</label>
+              <input id="edit-peak-date" type="date" name="date" />
+            </div>
+            <div class="modal-actions">
+              <button type="submit">Save</button>
+              <button type="button" id="cancel-edit" class="secondary-btn">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Toast Message -->
       <div id="toast-container"></div>
     </div>
