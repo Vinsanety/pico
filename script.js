@@ -12,6 +12,8 @@ const mySummitsTable = document.getElementById("my-summits-table");
 const mySummitsList = document.getElementById("recent-summits-list");
 const mapRadio = document.getElementById("map-view-radio");
 const tableRadio = document.getElementById("table-view-radio");
+const editSubmissionModal = document.getElementById("edit-submission-modal");
+const editPeakDateInput = document.getElementById("edit-peak-date");
 
 /* ===== State ===== */
 let peaks = JSON.parse(localStorage.getItem("peaks")) || [];
@@ -21,14 +23,17 @@ let previewMarker = null;
 let showingTable = false;
 
 /* ===== Helper Functions ===== */
+// Takes peak.name and returns just the first part (i.e. "Longs Peak")
 function formatPeakName(name) {
   return name.split(",")[0];
 }
 
+// Takes peak.name and returns location (i.e. "Boulder County, Colorado, United States")
 function getLocationFromPeakName(fullName) {
   return fullName.split(", ").slice(1).join(", ");
 }
 
+// Formats dates from peak.date (i.e. "1/1/2025")
 function formatDateUS(isoDateStr) {
   if (!isoDateStr) return "";
   const [year, month, day] = isoDateStr.split("-").map(Number);
@@ -38,6 +43,37 @@ function formatDateUS(isoDateStr) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+// Deletes an Submission
+function createDeleteButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "delete-btn";
+  btn.textContent = "\u2715";
+  btn.onclick = () => {
+    if (confirm(`Are you sure you want to delete ${peak.name}?`)) {
+      peaks = peaks.filter((p) => p.name !== peak.name);
+      savePeaks();
+      renderRecentSummitsList();
+      renderMySummitsTable();
+      renderMapMarkers();
+      showToast(`Removed ${peak.name}`, "destructive");
+    }
+  };
+  return btn;
+}
+
+// Edits an Submission
+function createEditButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "edit-btn";
+  btn.textContent = "\u270F";
+  btn.onclick = () => {
+    currentEditingPeak = peak;
+    editPeakDateInput.value = peak.date || "";
+    editSubmissionModal.classList.remove("hidden");
+  };
+  return btn;
 }
 
 /* ===== Map/Table Toggle ===== */
@@ -110,20 +146,7 @@ function renderRecentSummitsList() {
       </div>
     `;
 
-    const delBtn = document.createElement("button");
-    delBtn.className = "delete-btn";
-    delBtn.textContent = "\u2715";
-    delBtn.onclick = () => {
-      if (confirm(`Are you sure you want to Delete ${peak.name}?`)) {
-        peaks = peaks.filter((p) => p.name !== peak.name);
-        savePeaks();
-        renderRecentSummitsList();
-        renderMySummitsTable();
-        renderMapMarkers();
-        showToast(`Removed ${peak.name}`, "destructive");
-      }
-    };
-
+    const delBtn = createDeleteButton(peak);
     li.appendChild(delBtn);
     mySummitsList.appendChild(li);
   });
@@ -151,8 +174,32 @@ function renderMySummitsTable() {
 
   const tbody = document.createElement("tbody");
 
-  peaks.forEach((peak) => {
+  // Sort peaks by date (newest first)
+  const sortedPeaks = [...peaks].sort((a, b) => {
+    if (!a.date) return 1; // push undated to bottom
+    if (!b.date) return -1;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  sortedPeaks.forEach((peak) => {
     const tr = document.createElement("tr");
+
+    let dateCellContent = peak.date
+      ? formatDateUS(peak.date)
+      : `<span class="no-date-badge">No date</span>`;
+
+    tr.innerHTML = `
+      <td>${formatPeakName(peak.name)}</td>
+      <td>${getLocationFromPeakName(peak.name)}</td>
+      <td>
+        ${
+          peak.elevation
+            ? peak.elevation.toLocaleString("en-US") + " ft"
+            : " - "
+        }
+      </td>
+      <td>${dateCellContent}</td>
+    `;
 
     tr.innerHTML = `
       <td>${formatPeakName(peak.name)}</td>
@@ -160,25 +207,17 @@ function renderMySummitsTable() {
       <td>${
         peak.elevation ? peak.elevation.toLocaleString("en-US") + " ft" : " - "
       }</td>
-      <td>${peak.date ? formatDateUS(peak.date) : " - "}</td>
+      <td>${dateCellContent}</td>
     `;
 
     const actionTd = document.createElement("td");
-    const delBtn = document.createElement("button");
-    delBtn.className = "delete-btn";
-    delBtn.textContent = "\u2715";
-    delBtn.onclick = () => {
-      if (confirm(`Are you sure you want to delete ${peak.name}?`)) {
-        peaks = peaks.filter((p) => p.name !== peak.name);
-        savePeaks();
-        renderRecentSummitsList();
-        renderMySummitsTable();
-        renderMapMarkers();
-        showToast(`Removed ${peak.name}`, "destructive");
-      }
-    };
-    actionTd.appendChild(delBtn);
+    actionTd.className = "actions-td";
+
+    actionTd.appendChild(createEditButton(peak));
+    actionTd.appendChild(createDeleteButton(peak));
+
     tr.appendChild(actionTd);
+
     tbody.appendChild(tr);
   });
 
@@ -595,6 +634,29 @@ form.addEventListener("submit", async (e) => {
   peakInput.dataset.city = "";
   peakInput.dataset.state = "";
   showAddPeakPreview(null);
+});
+
+/* ===== Edit Modal ===== */
+let currentEditingPeak = null;
+
+document.getElementById("edit-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const newDate = editPeakDateInput.value;
+  if (currentEditingPeak) {
+    currentEditingPeak.date = newDate;
+    savePeaks();
+    renderMySummitsTable();
+    renderRecentSummitsList();
+    renderMapMarkers();
+    showToast(`Updated date for ${currentEditingPeak.name}`, "success");
+  }
+  editSubmissionModal.classList.add("hidden");
+  currentEditingPeak = null;
+});
+
+document.getElementById("cancel-edit").addEventListener("click", () => {
+  editSubmissionModal.classList.add("hidden");
+  currentEditingPeak = null;
 });
 
 /* ===== Start App ===== */
