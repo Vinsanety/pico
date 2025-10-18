@@ -158,7 +158,7 @@ function renderMySummitsTable() {
       <td>${formatPeakName(peak.name)}</td>
       <td>${getLocationFromPeakName(peak.name)}</td>
       <td>${
-        peak.elevation.toLocaleString("en-US") ? peak.elevation + " ft" : " - "
+        peak.elevation ? peak.elevation.toLocaleString("en-US") + " ft" : " - "
       }</td>
       <td>${peak.date ? formatDateUS(peak.date) : " - "}</td>
     `;
