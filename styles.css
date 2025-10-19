@@ -105,7 +105,7 @@ header .header-logo {
 }
 
 /* ===== TABLE VIEW ===== */
-#my-summits-table {
+#my-summits-table.active {
   margin: 2rem;
 }
 .summits-table {
@@ -165,24 +165,6 @@ header .header-logo {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-}
-
-@media (max-width: 667px) {
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
-  #map {
-    order: 1;
-    height: 50vh;
-  }
-  aside {
-    order: 2;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    height: auto;
-  }
 }
 
 /* ===== VIEW TOGGLE SWITCH ===== */
@@ -864,4 +846,34 @@ footer .copyright {
   font-size: 0.75rem;
   padding: 0.5rem;
   margin: 0;
+}
+
+/* ===== MOBILE LAYOUT ===== */
+@media (max-width: 667px) {
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  #map {
+    order: 1;
+    height: 40vh;
+  }
+  aside {
+    order: 2;
+    height: auto;
+    padding-top: 0.5rem;
+    border-right: none;
+    border-top: 1px solid var(--border);
+  }
+  aside header {
+    padding: 0;
+  }
+  aside header img {
+    width: 175px;
+    padding: 0;
+  }
+  aside header .subheader {
+    display: none;
+  }
 }
