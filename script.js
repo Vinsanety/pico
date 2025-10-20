@@ -1,11 +1,11 @@
 /* ===== DOM Elements ===== */
-const form = document.getElementById("peak-form");
-const myPeakCount = document.getElementById("my-peak-count");
-const dateInput = document.getElementById("peak-date");
-const peakInput = document.getElementById("peak-input");
+const addSummitForm = document.getElementById("add-summit-form");
+const mySummitCount = document.getElementById("my-summit-count");
+const dateInput = document.getElementById("summit-date");
+const summitInput = document.getElementById("summit-input");
 const peakSuggestions = document.getElementById("peak-suggestions");
-const elevationInput = document.getElementById("peak-elevation");
-const addPeakPreview = document.getElementById("add-peak-preview");
+const elevationInput = document.getElementById("summit-elevation");
+const addSummmitPreview = document.getElementById("add-summit-preview");
 const previewModeBanner = document.getElementById("preview-mode-banner");
 const mapView = document.getElementById("map");
 const mySummitsTable = document.getElementById("my-summits-table");
@@ -13,7 +13,7 @@ const mySummitsList = document.getElementById("recent-summits-list");
 const mapRadio = document.getElementById("map-view-radio");
 const tableRadio = document.getElementById("table-view-radio");
 const editSubmissionModal = document.getElementById("edit-submission-modal");
-const editPeakDateInput = document.getElementById("edit-peak-date");
+const editSummitDate = document.getElementById("edit-summit-date");
 
 /* ===== State ===== */
 let peaks = JSON.parse(localStorage.getItem("peaks")) || [];
@@ -70,7 +70,7 @@ function createEditButton(peak) {
   btn.textContent = "\u270F";
   btn.onclick = () => {
     currentEditingPeak = peak;
-    editPeakDateInput.value = peak.date || "";
+    editSummitDate.value = peak.date || "";
     editSubmissionModal.classList.remove("hidden");
   };
   return btn;
@@ -93,6 +93,23 @@ tableRadio.addEventListener("change", () => {
     showingTable = true;
   }
 });
+
+/* ===== My Summits / Add Summit Form Toggle ===== */
+const myRecentSummitsContainer = document.getElementById(
+  "my-recent-summits-container"
+);
+const addSummitBtn = document.getElementById("add-summit-btn");
+const cancelAddSummitBtn = document.getElementById("cancel-add-summit-btn");
+function showForm() {
+  myRecentSummitsContainer.classList.remove("active");
+  addSummitForm.classList.add("active");
+}
+function showMySummits() {
+  addSummitForm.classList.remove("active");
+  myRecentSummitsContainer.classList.add("active");
+}
+addSummitBtn.addEventListener("click", showForm);
+cancelAddSummitBtn.addEventListener("click", showMySummits);
 
 /* ===== OSM Elevation API Fetch  ===== */
 async function getElevationFromOSM(lat, lon) {
@@ -150,7 +167,7 @@ function renderRecentSummitsList() {
     li.appendChild(delBtn);
     mySummitsList.appendChild(li);
   });
-  myPeakCount.textContent = peaks.length;
+  mySummitCount.textContent = peaks.length;
 }
 
 /* ===== My Summits - Table ===== */
@@ -227,15 +244,15 @@ function renderMySummitsTable() {
 
 /* ===== Date Input ===== */
 dateInput.addEventListener("input", () => {
-  if (addPeakPreview.classList.contains("show")) {
+  if (addSummmitPreview.classList.contains("show")) {
     // Grab the last peakData shown (you can store it globally when calling showAddPeakPreview)
     const currentPeak = {
-      name: peakInput.value,
-      city: peakInput.dataset.city || "",
-      state: peakInput.dataset.state || "",
-      elevation: peakInput.dataset.elevation || "",
-      lat: peakInput.dataset.lat || null,
-      lon: peakInput.dataset.lon || null,
+      name: summitInput.value,
+      city: summitInput.dataset.city || "",
+      state: summitInput.dataset.state || "",
+      elevation: summitInput.dataset.elevation || "",
+      lat: summitInput.dataset.lat || null,
+      lon: summitInput.dataset.lon || null,
     };
     showAddPeakPreview(currentPeak);
   }
@@ -347,11 +364,11 @@ previewModeBanner.addEventListener("click", () => showAddPeakPreview(null));
 function showAddPeakPreview(peakData) {
   if (!peakData) {
     previewModeBanner.classList.remove("show");
-    addPeakPreview.innerHTML = "";
-    addPeakPreview.classList.remove("show");
+    addSummmitPreview.innerHTML = "";
+    addSummmitPreview.classList.remove("show");
 
-    if (peakInput) {
-      peakInput.value = "";
+    if (summitInput) {
+      summitInput.value = "";
     }
 
     if (dateInput) {
@@ -367,9 +384,9 @@ function showAddPeakPreview(peakData) {
   }
 
   previewModeBanner.classList.add("show");
-  addPeakPreview.classList.add("show");
+  addSummmitPreview.classList.add("show");
 
-  addPeakPreview.innerHTML = `
+  addSummmitPreview.innerHTML = `
   <h5 class="muted">Peak to add</h5>
     ${
       dateInput.value
@@ -429,8 +446,8 @@ function filterSummits(results) {
 /* ===== Typeahead Autocomplete (OSM + Elevation) ===== */
 let debounceTimer;
 
-peakInput.addEventListener("input", () => {
-  const query = peakInput.value.trim();
+summitInput.addEventListener("input", () => {
+  const query = summitInput.value.trim();
   clearTimeout(debounceTimer);
 
   if (query.length < 2) {
@@ -470,13 +487,13 @@ peakInput.addEventListener("input", () => {
             const lon = parseFloat(r.lon);
             const elev = await getElevationFromOSM(lat, lon);
 
-            peakInput.value = r.display_name;
-            peakInput.dataset.lat = lat;
-            peakInput.dataset.lon = lon;
-            peakInput.dataset.elevation = elev || "";
-            peakInput.dataset.city =
+            summitInput.value = r.display_name;
+            summitInput.dataset.lat = lat;
+            summitInput.dataset.lon = lon;
+            summitInput.dataset.elevation = elev || "";
+            summitInput.dataset.city =
               r.address.city || r.address.town || r.address.village || "";
-            peakInput.dataset.state = r.address.state || "";
+            summitInput.dataset.state = r.address.state || "";
 
             peakSuggestions.innerHTML = "";
             peakSuggestions.classList.remove("show");
@@ -486,8 +503,8 @@ peakInput.addEventListener("input", () => {
               elevation: elev,
               lat,
               lon,
-              city: peakInput.dataset.city,
-              state: peakInput.dataset.state,
+              city: summitInput.dataset.city,
+              state: summitInput.dataset.state,
             });
           });
           peakSuggestions.appendChild(li);
@@ -508,7 +525,7 @@ peakInput.addEventListener("input", () => {
 });
 // Close peakSuggestions if clicking outside
 document.addEventListener("click", (e) => {
-  if (!peakSuggestions.contains(e.target) && e.target !== peakInput) {
+  if (!peakSuggestions.contains(e.target) && e.target !== summitInput) {
     peakSuggestions.classList.remove("show");
   }
 });
@@ -559,17 +576,17 @@ function processQueue() {
   }, 5000);
 }
 
-/* ===== Form Submission ===== */
-form.addEventListener("submit", async (e) => {
+/* ===== Add Summit Form Submission ===== */
+addSummitForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  addPeakPreview.classList.remove("show");
-  const name = peakInput.value.trim();
+  addSummmitPreview.classList.remove("show");
+  const name = summitInput.value.trim();
   const date = dateInput.value;
   let elevation = elevationInput.value
     ? parseInt(elevationInput.value, 10)
-    : peakInput.dataset.elevation
-    ? parseInt(peakInput.dataset.elevation, 10)
+    : summitInput.dataset.elevation
+    ? parseInt(summitInput.dataset.elevation, 10)
     : null;
 
   if (!name) {
@@ -577,10 +594,10 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  let lat = parseFloat(peakInput.dataset.lat) || null;
-  let lon = parseFloat(peakInput.dataset.lon) || null;
-  let city = peakInput.dataset.city || "";
-  let state = peakInput.dataset.state || "";
+  let lat = parseFloat(summitInput.dataset.lat) || null;
+  let lon = parseFloat(summitInput.dataset.lon) || null;
+  let city = summitInput.dataset.city || "";
+  let state = summitInput.dataset.state || "";
 
   // If no coords yet, geocode
   if (!lat || !lon) {
@@ -623,16 +640,17 @@ form.addEventListener("submit", async (e) => {
   const peakData = { name, elevation, lat, lon, date, city, state };
   peaks.push(peakData);
   savePeaks();
+  showMySummits();
   renderRecentSummitsList();
   renderMySummitsTable();
   renderMapMarkers();
   showToast(`Added ${name}`, "success");
-  form.reset();
-  peakInput.dataset.lat = "";
-  peakInput.dataset.lon = "";
-  peakInput.dataset.elevation = "";
-  peakInput.dataset.city = "";
-  peakInput.dataset.state = "";
+  addSummitForm.reset();
+  summitInput.dataset.lat = "";
+  summitInput.dataset.lon = "";
+  summitInput.dataset.elevation = "";
+  summitInput.dataset.city = "";
+  summitInput.dataset.state = "";
   showAddPeakPreview(null);
 });
 
@@ -641,7 +659,7 @@ let currentEditingPeak = null;
 
 document.getElementById("edit-form").addEventListener("submit", (e) => {
   e.preventDefault();
-  const newDate = editPeakDateInput.value;
+  const newDate = editSummitDate.value;
   if (currentEditingPeak) {
     currentEditingPeak.date = newDate;
     savePeaks();
@@ -666,7 +684,7 @@ function init() {
   renderMapMarkers();
   // Ensure hidden by default on load
   peakSuggestions.classList.remove("show");
-  addPeakPreview.classList.remove("show");
+  addSummmitPreview.classList.remove("show");
   map.fitBounds(usaBounds);
 }
 
