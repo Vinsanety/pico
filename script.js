@@ -94,6 +94,23 @@ tableRadio.addEventListener("change", () => {
   }
 });
 
+/* ===== My Summits / Form Toggle ===== */
+const myRecentSummitsContainer = document.getElementById(
+  "my-recent-summits-container"
+);
+const addSummitBtn = document.getElementById("add-summit-btn");
+const cancelAddSummitBtn = document.getElementById("cancel-add-summit-btn");
+function showForm() {
+  myRecentSummitsContainer.classList.remove("active");
+  form.classList.add("active");
+}
+function showMySummits() {
+  form.classList.remove("active");
+  myRecentSummitsContainer.classList.add("active");
+}
+addSummitBtn.addEventListener("click", showForm);
+cancelAddSummitBtn.addEventListener("click", showMySummits);
+
 /* ===== OSM Elevation API Fetch  ===== */
 async function getElevationFromOSM(lat, lon) {
   // Overpass query: find nodes/ways with ele=* within ~100m of the point
@@ -623,6 +640,7 @@ form.addEventListener("submit", async (e) => {
   const peakData = { name, elevation, lat, lon, date, city, state };
   peaks.push(peakData);
   savePeaks();
+  showMySummits();
   renderRecentSummitsList();
   renderMySummitsTable();
   renderMapMarkers();

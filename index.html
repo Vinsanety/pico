@@ -49,8 +49,9 @@
           </div>
         </header>
 
-        <h3>Add a Summit</h3>
-        <form id="peak-form">
+        <!-- Main Form -->
+        <form id="peak-form" class="view">
+          <h3>Log a Summit</h3>
           <div class="form-fields-container">
             <!-- Date Input -->
             <div class="form-field">
@@ -79,23 +80,24 @@
                 placeholder="e.g. 14265"
               />
             </div>
+            <!-- Preview Data before clicking submit button -->
+            <div id="add-peak-preview"></div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                id="cancel-add-summit-btn"
+                class="secondary-btn"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="primary-btn">Log Summit</button>
+            </div>
           </div>
-
-          <!-- Preview Data before clicking submit button -->
-          <div id="add-peak-preview"></div>
-
-          <!-- Submit Button -->
-          <button type="submit">Add peak</button>
         </form>
 
-        <hr style="margin-top: 2rem" />
-
-        <div class="my-summits-container">
-          <h3 class="my-summits-heading">
-            <strong>Total Summits:&nbsp;</strong>
-            <span id="my-peak-count">-</span>
-          </h3>
-
+        <!-- My Summits Container -->
+        <div id="my-recent-summits-container" class="view active">
           <!-- Map/Table Toggle Button -->
           <div class="toggle-container">
             <input type="radio" id="map-view-radio" name="view" checked />
@@ -104,6 +106,15 @@
             <input type="radio" id="table-view-radio" name="view" />
             <label for="table-view-radio">Table</label>
           </div>
+
+          <h3 class="my-summits-heading">
+            Total Summits:&nbsp;
+            <span id="my-peak-count">-</span>
+          </h3>
+
+          <button id="add-summit-btn" class="primary-btn">
+            Add Summit &#43;
+          </button>
 
           <!-- Recent Summits List (last 5 logged)-->
           <span>Recent Logged Summits</span>
@@ -136,7 +147,7 @@
               <button type="button" id="cancel-edit" class="secondary-btn">
                 Cancel
               </button>
-              <button type="submit">Save</button>
+              <button type="submit" class="primary-btn">Save</button>
             </div>
           </form>
         </div>
