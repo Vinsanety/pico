@@ -606,7 +606,16 @@ addSummitForm.addEventListener("submit", async (e) => {
     }
   }
 
-  const peakData = { name, elevation, lat, lon, date, city, state };
+  const peakData = {
+    id: Date.now(),
+    name,
+    elevation,
+    lat,
+    lon,
+    date,
+    city,
+    state,
+  };
   peaks.push(peakData);
   savePeaks();
   showMySummits();
@@ -756,18 +765,20 @@ function openEditModal(peak) {
   cancelBtn.onclick = closeModal;
 
   const saveBtn = document.createElement("button");
-  saveBtn.type = "submit";
+  saveBtn.type = "button"; // handle manually
   saveBtn.textContent = "Save";
   saveBtn.className = "primary-btn";
 
-  form.onsubmit = (e) => {
-    e.preventDefault();
-    peak.date = input.value;
-    savePeaks();
-    renderMySummitsTable();
-    renderRecentSummitsList();
-    renderMapMarkers();
-    showToast(`Updated date for ${peak.name}`, "success");
+  saveBtn.onclick = () => {
+    const idx = peaks.findIndex((p) => p.id === peak.id);
+    if (idx !== -1) {
+      peaks[idx].date = input.value;
+      savePeaks();
+      renderMySummitsTable();
+      renderRecentSummitsList();
+      renderMapMarkers();
+      showToast(`Updated date for ${peaks[idx].name}`, "success");
+    }
     closeModal();
   };
 
@@ -792,7 +803,6 @@ function createDeleteButton(peak) {
 function openDeleteModal(peak) {
   const message = document.createElement("p");
   message.style.whiteSpace = "pre-line";
-
   message.textContent = `Are you sure you want to delete ${formatPeakName(
     peak.name
   )} on ${formatDateUS(peak.date)}?\n\nThis action cannot be undone.`;
@@ -808,7 +818,7 @@ function openDeleteModal(peak) {
   deleteBtn.textContent = "Delete";
   deleteBtn.className = "btn-destructive";
   deleteBtn.onclick = () => {
-    peaks = peaks.filter((p) => p.name !== peak.name);
+    peaks = peaks.filter((p) => p.id !== peak.id);
     savePeaks();
     renderRecentSummitsList();
     renderMySummitsTable();
