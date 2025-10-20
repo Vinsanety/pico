@@ -16,6 +16,8 @@
   --accent-dim: #d89c1f;
 
   --red: #ef4444;
+  --red-dim: #dc2626;
+
   --border: #1f2937;
   --border-light: #9ca3af;
   --transition-all: all 0.25s ease;
@@ -156,6 +158,7 @@ header .header-logo {
 .modal-content {
   background: var(--panel);
   padding: 1.5rem;
+  line-height: 1.5;
   border-radius: 0.5rem;
   max-width: 400px;
   width: 100%;
@@ -367,6 +370,40 @@ button.secondary-btn:active {
 
 button#add-summit-btn {
   margin-bottom: 2rem;
+}
+
+button.btn-destructive {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 2px solid var(--red);
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease, transform 0.15s ease;
+}
+
+button.btn-destructive:hover {
+  background: var(--red-dim);
+  border-color: var(--red-dim);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+  transform: translateY(-2px);
+}
+
+button.btn-destructive:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.45);
+  background: var(--red);
+  color: #fff;
+}
+
+button.btn-destructive:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
 }
 
 #peak-suggestions {

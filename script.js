@@ -45,37 +45,6 @@ function formatDateUS(isoDateStr) {
   });
 }
 
-// Deletes an Submission
-function createDeleteButton(peak) {
-  const btn = document.createElement("button");
-  btn.className = "delete-btn";
-  btn.textContent = "\u2715";
-  btn.onclick = () => {
-    if (confirm(`Are you sure you want to delete ${peak.name}?`)) {
-      peaks = peaks.filter((p) => p.name !== peak.name);
-      savePeaks();
-      renderRecentSummitsList();
-      renderMySummitsTable();
-      renderMapMarkers();
-      showToast(`Removed ${peak.name}`, "destructive");
-    }
-  };
-  return btn;
-}
-
-// Edits an Submission
-function createEditButton(peak) {
-  const btn = document.createElement("button");
-  btn.className = "edit-btn";
-  btn.textContent = "\u270F";
-  btn.onclick = () => {
-    currentEditingPeak = peak;
-    editSummitDate.value = peak.date || "";
-    editSubmissionModal.classList.remove("hidden");
-  };
-  return btn;
-}
-
 /* ===== Map/Table Toggle ===== */
 mapRadio.addEventListener("change", () => {
   if (mapRadio.checked) {
@@ -654,28 +623,134 @@ addSummitForm.addEventListener("submit", async (e) => {
   showAddPeakPreview(null);
 });
 
-/* ===== Edit Modal ===== */
-let currentEditingPeak = null;
+/* ===== Modal (Edit & Delete) ===== */
+const appModal = document.getElementById("app-modal");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+const modalActions = document.getElementById("modal-actions");
 
-document.getElementById("edit-form").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const newDate = editSummitDate.value;
-  if (currentEditingPeak) {
-    currentEditingPeak.date = newDate;
+function escHandler(e) {
+  if (e.key === "Escape") {
+    closeModal();
+  }
+}
+
+function openModal({ title, body, actions }) {
+  modalTitle.textContent = title;
+  modalBody.replaceChildren(body);
+  modalActions.replaceChildren(...actions);
+  appModal.classList.remove("hidden");
+  document.addEventListener("keydown", escHandler);
+}
+
+function closeModal() {
+  appModal.classList.add("hidden");
+  document.removeEventListener("keydown", escHandler);
+}
+
+// Icon Button that opens Edit Modal
+function createEditButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "edit-btn";
+  btn.textContent = "✎";
+  btn.onclick = () => openEditModal(peak);
+  return btn;
+}
+
+// Edit Modal
+function openEditModal(peak) {
+  const form = document.createElement("form");
+  form.id = "edit-form";
+
+  const field = document.createElement("div");
+  field.className = "form-field";
+
+  const label = document.createElement("label");
+  label.htmlFor = "edit-peak-date";
+  label.textContent = "Date climbed";
+
+  const input = document.createElement("input");
+  input.id = "edit-peak-date";
+  input.type = "date";
+  input.name = "date";
+  input.value = peak.date || "";
+
+  field.append(label, input);
+  form.appendChild(field);
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.className = "secondary-btn";
+  cancelBtn.onclick = closeModal;
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "submit";
+  saveBtn.textContent = "Save";
+  saveBtn.className = "primary-btn";
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    peak.date = input.value;
     savePeaks();
     renderMySummitsTable();
     renderRecentSummitsList();
     renderMapMarkers();
-    showToast(`Updated date for ${currentEditingPeak.name}`, "success");
-  }
-  editSubmissionModal.classList.add("hidden");
-  currentEditingPeak = null;
-});
+    showToast(`Updated date for ${peak.name}`, "success");
+    closeModal();
+  };
 
-document.getElementById("cancel-edit").addEventListener("click", () => {
-  editSubmissionModal.classList.add("hidden");
-  currentEditingPeak = null;
-});
+  openModal({
+    title: `Edit Summit - ${formatPeakName(peak.name)}`,
+    body: form,
+    actions: [cancelBtn, saveBtn],
+  });
+}
+
+// Icon Button that opens Detele Modal
+function createDeleteButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "delete-btn";
+  btn.textContent = "✕";
+  btn.onclick = () => openDeleteModal(peak);
+  return btn;
+}
+
+// Delete Modal
+function openDeleteModal(peak) {
+  const message = document.createElement("p");
+  message.style.whiteSpace = "pre-line";
+
+  message.textContent = `Are you sure you want to delete ${formatPeakName(
+    peak.name
+  )} on ${formatDateUS(peak.date)}?\n\nThis action cannot be undone.`;
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.className = "secondary-btn";
+  cancelBtn.onclick = closeModal;
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.textContent = "Delete";
+  deleteBtn.className = "btn-destructive";
+  deleteBtn.onclick = () => {
+    peaks = peaks.filter((p) => p.name !== peak.name);
+    savePeaks();
+    renderRecentSummitsList();
+    renderMySummitsTable();
+    renderMapMarkers();
+    showToast(`Removed ${peak.name}`, "destructive");
+    closeModal();
+  };
+
+  openModal({
+    title: "Confirm Delete",
+    body: message,
+    actions: [cancelBtn, deleteBtn],
+  });
+}
 
 /* ===== Start App ===== */
 function init() {
