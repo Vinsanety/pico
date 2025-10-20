@@ -3,7 +3,7 @@
   <desc id="desc">Adventure/outdoors logo with main mountain peak, compass, and text.</desc>
 
   <!-- Background -->
-  <rect x="0" y="0" width="520" height="155" fill="#0F1A20" />
+  <rect x="0" y="0" width="520" height="155" fill="#0f172a" />
 
   <!-- Sun -->
   <circle cx="125" cy="55" r="28" fill="#F0B429" />

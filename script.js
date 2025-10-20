@@ -629,6 +629,9 @@ const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
 const modalActions = document.getElementById("modal-actions");
 
+let lastFocusedElement = null;
+let trapFocusHandler = null;
+
 function escHandler(e) {
   if (e.key === "Escape") {
     closeModal();
@@ -636,16 +639,83 @@ function escHandler(e) {
 }
 
 function openModal({ title, body, actions }) {
+  // Save the element that was focused before opening
+  lastFocusedElement = document.activeElement;
+
   modalTitle.textContent = title;
   modalBody.replaceChildren(body);
   modalActions.replaceChildren(...actions);
   appModal.classList.remove("hidden");
+
+  // Trap focus
+  const focusableSelectors = [
+    "a[href]",
+    "button:not([disabled])",
+    "textarea:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])",
+  ];
+  const focusableEls = appModal.querySelectorAll(focusableSelectors.join(","));
+  const firstEl = focusableEls[0];
+  const lastEl = focusableEls[focusableEls.length - 1];
+
+  if (firstEl) {
+    firstEl.focus();
+  } else {
+    // fallback: focus modal container
+    const modalContent = appModal.querySelector(".modal-content");
+    modalContent.setAttribute("tabindex", "-1");
+    modalContent.focus();
+  }
+
+  trapFocusHandler = function (e) {
+    if (e.key === "Tab") {
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    }
+  };
+
   document.addEventListener("keydown", escHandler);
+  document.addEventListener("keydown", trapFocusHandler);
+
+  // Click outside to close
+  appModal.addEventListener("click", backdropHandler);
+}
+
+function backdropHandler(e) {
+  if (e.target === appModal) {
+    closeModal();
+  }
 }
 
 function closeModal() {
   appModal.classList.add("hidden");
   document.removeEventListener("keydown", escHandler);
+
+  if (trapFocusHandler) {
+    document.removeEventListener("keydown", trapFocusHandler);
+    trapFocusHandler = null;
+  }
+
+  appModal.removeEventListener("click", backdropHandler);
+
+  // Remove tabindex fallback if it was added
+  const modalContent = appModal.querySelector(".modal-content");
+  if (modalContent.hasAttribute("tabindex")) {
+    modalContent.removeAttribute("tabindex");
+  }
+
+  // Restore focus to the element that opened the modal
+  if (lastFocusedElement) {
+    lastFocusedElement.focus();
+    lastFocusedElement = null;
+  }
 }
 
 // Icon Button that opens Edit Modal
@@ -653,6 +723,7 @@ function createEditButton(peak) {
   const btn = document.createElement("button");
   btn.className = "edit-btn";
   btn.textContent = "✎";
+  btn.setAttribute("aria-label", `Edit ${peak.name}`);
   btn.onclick = () => openEditModal(peak);
   return btn;
 }
@@ -707,11 +778,12 @@ function openEditModal(peak) {
   });
 }
 
-// Icon Button that opens Detele Modal
+// Icon Button that opens Delete Modal
 function createDeleteButton(peak) {
   const btn = document.createElement("button");
   btn.className = "delete-btn";
   btn.textContent = "✕";
+  btn.setAttribute("aria-label", `Delete ${peak.name}`);
   btn.onclick = () => openDeleteModal(peak);
   return btn;
 }
