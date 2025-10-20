@@ -1,17 +1,23 @@
 :root {
   --bg: #0f172a;
+  --bg-light: #f9fafb;
   --panel: #111827;
+  --panel-light: #d1d5db;
+
   --text: #e5e7eb;
   --text-dark: var(--bg);
   --muted: #9ca3af;
+
   --primary: #34d399;
   --primary-dim: #065f46;
   --secondary: #3d5a73;
   --secondary-dim: #2f4457;
   --accent: #f0b429;
   --accent-dim: #d89c1f;
+
   --red: #ef4444;
   --border: #1f2937;
+  --border-light: #9ca3af;
   --transition-all: all 0.25s ease;
 }
 
@@ -76,6 +82,8 @@ header .header-logo {
 /* ===== MAIN VIEW (WRAPPER) ===== */
 #view-wrapper {
   display: block;
+  color: var(--text-dark);
+  background-color: var(--bg-light);
   overflow: auto;
 }
 .view {
@@ -112,7 +120,7 @@ header .header-logo {
 }
 .summits-table th,
 .summits-table td {
-  border: 1px solid var(--muted);
+  border: 1px solid var(--border-light);
   padding: 0.5rem 0.875rem;
 }
 .summits-table .actions-td {
@@ -129,8 +137,7 @@ header .header-logo {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--text-dark);
-  background-color: #eee;
+  background-color: var(--panel-light);
   border-radius: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
