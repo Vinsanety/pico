@@ -168,7 +168,7 @@ header .header-logo {
 }
 
 /* ===== VIEW TOGGLE SWITCH ===== */
-.toggle-container {
+.toggle-view-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -181,13 +181,13 @@ header .header-logo {
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 /* Hide radios but keep them accessible */
-.toggle-container input[type="radio"] {
+.toggle-view-container input[type="radio"] {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 /* Labels styled like buttons */
-.toggle-container label {
+.toggle-view-container label {
   flex: 1;
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -196,15 +196,15 @@ header .header-logo {
   color: var(--text-dark);
   user-select: none;
 }
-.toggle-container input[type="radio"]:checked + label {
+.toggle-view-container input[type="radio"]:checked + label {
   background: var(--accent);
   color: var(--text-dark);
   font-weight: 700;
 }
-.toggle-container label:hover {
+.toggle-view-container label:hover {
   background: var(--accent-dim);
 }
-.toggle-container:focus-within {
+.toggle-view-container:focus-within {
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.55);
 }
 
@@ -215,7 +215,7 @@ header .header-logo {
 }
 
 /* ===== MAIN FORM ===== */
-#peak-form .form-fields-container {
+#add-summit-form .form-fields-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -451,7 +451,7 @@ ul#recent-summits-list li span.elevation {
   cursor: pointer;
 }
 
-#add-peak-preview {
+#add-summit-preview {
   display: none; /* hidden until peak selected */
   margin-top: 1rem;
   padding: 1.5rem 1.25rem;
@@ -461,35 +461,35 @@ ul#recent-summits-list li span.elevation {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
-#add-peak-preview.show {
+#add-summit-preview.show {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-#add-peak-preview h5 {
+#add-summit-preview h5 {
   color: var(--primary);
   margin: 0;
   font-size: 1rem;
 }
 
-#add-peak-preview .preview-data {
+#add-summit-preview .preview-data {
   margin: 0;
   padding-bottom: 1rem;
   border-bottom: 2px dashed #374151;
 }
 
-#add-peak-preview .preview-data:last-child {
+#add-summit-preview .preview-data:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-#add-peak-preview .preview-label {
+#add-summit-preview .preview-label {
   font-weight: 600;
   color: var(--muted);
 }
 
-#add-peak-preview .preview-value {
+#add-summit-preview .preview-value {
   color: var(--text);
 }
 

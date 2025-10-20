@@ -50,7 +50,7 @@
         </header>
 
         <!-- Map/Table Toggle Button -->
-        <div class="toggle-container">
+        <div class="toggle-view-container">
           <!-- Map Radio -->
           <input type="radio" id="map-view-radio" name="view" checked />
           <label for="map-view-radio">Map</label>
@@ -63,7 +63,7 @@
         <div id="my-recent-summits-container" class="view active">
           <h3 class="my-summits-heading">
             Total Summits:&nbsp;
-            <span id="my-peak-count">-</span>
+            <span id="my-summit-count">-</span>
           </h3>
 
           <!-- Submit Summit Button -->
@@ -77,21 +77,21 @@
         </div>
 
         <!-- Main Form -->
-        <form id="peak-form" class="view">
+        <form id="add-summit-form" class="view">
           <h3>Log a Summit</h3>
 
           <div class="form-fields-container">
             <!-- Date Input -->
             <div class="form-field">
-              <label for="peak-date">Date climbed</label>
-              <input id="peak-date" type="date" />
+              <label for="summit-date">Date climbed</label>
+              <input id="summit-date" type="date" />
             </div>
 
-            <!-- Peak Name Combobox -->
+            <!-- Summit Name Combobox -->
             <div class="form-field">
-              <label for="peak-input">Summit</label>
+              <label for="summit-input">Summit</label>
               <input
-                id="peak-input"
+                id="summit-input"
                 type="text"
                 placeholder="Start typing a peak…"
                 autocomplete="off"
@@ -101,16 +101,16 @@
 
             <!-- Elevation Input -->
             <div class="form-field">
-              <label for="peak-elevation">Elevation (ft)</label>
+              <label for="summit-elevation">Elevation (ft)</label>
               <input
-                id="peak-elevation"
+                id="summit-elevation"
                 type="number"
                 placeholder="e.g. 14265"
               />
             </div>
 
             <!-- Preview Summit before submitting -->
-            <div id="add-peak-preview"></div>
+            <div id="add-summit-preview"></div>
 
             <!-- Log or Cancel Buttons -->
             <div class="form-actions">
@@ -139,14 +139,14 @@
         <div id="my-summits-table" class="view"></div>
       </div>
 
-      <!-- Edit Peak Modal -->
+      <!-- Edit Summit Modal -->
       <div id="edit-submission-modal" class="modal hidden">
         <div class="modal-content">
           <h3>Edit Summit</h3>
           <form id="edit-form">
             <div class="form-field">
-              <label for="edit-peak-date">Date climbed</label>
-              <input id="edit-peak-date" type="date" name="date" />
+              <label for="edit-summit-date">Date climbed</label>
+              <input id="edit-summit-date" type="date" name="date" />
             </div>
             <div class="modal-actions">
               <button type="button" id="cancel-edit" class="secondary-btn">
