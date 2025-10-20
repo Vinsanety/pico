@@ -49,9 +49,37 @@
           </div>
         </header>
 
+        <!-- Map/Table Toggle Button -->
+        <div class="toggle-container">
+          <!-- Map Radio -->
+          <input type="radio" id="map-view-radio" name="view" checked />
+          <label for="map-view-radio">Map</label>
+          <!-- Table Radio -->
+          <input type="radio" id="table-view-radio" name="view" />
+          <label for="table-view-radio">Table</label>
+        </div>
+
+        <!-- My Summits Container -->
+        <div id="my-recent-summits-container" class="view active">
+          <h3 class="my-summits-heading">
+            Total Summits:&nbsp;
+            <span id="my-peak-count">-</span>
+          </h3>
+
+          <!-- Submit Summit Button -->
+          <button id="add-summit-btn" class="primary-btn">
+            Add Summit &#43;
+          </button>
+
+          <!-- Recent Summits List (last 5 logged)-->
+          <span>Recent Logged Summits</span>
+          <ul id="recent-summits-list"></ul>
+        </div>
+
         <!-- Main Form -->
         <form id="peak-form" class="view">
           <h3>Log a Summit</h3>
+
           <div class="form-fields-container">
             <!-- Date Input -->
             <div class="form-field">
@@ -80,9 +108,11 @@
                 placeholder="e.g. 14265"
               />
             </div>
-            <!-- Preview Data before clicking submit button -->
+
+            <!-- Preview Summit before submitting -->
             <div id="add-peak-preview"></div>
 
+            <!-- Log or Cancel Buttons -->
             <div class="form-actions">
               <button
                 type="button"
@@ -95,31 +125,6 @@
             </div>
           </div>
         </form>
-
-        <!-- My Summits Container -->
-        <div id="my-recent-summits-container" class="view active">
-          <!-- Map/Table Toggle Button -->
-          <div class="toggle-container">
-            <input type="radio" id="map-view-radio" name="view" checked />
-            <label for="map-view-radio">Map</label>
-
-            <input type="radio" id="table-view-radio" name="view" />
-            <label for="table-view-radio">Table</label>
-          </div>
-
-          <h3 class="my-summits-heading">
-            Total Summits:&nbsp;
-            <span id="my-peak-count">-</span>
-          </h3>
-
-          <button id="add-summit-btn" class="primary-btn">
-            Add Summit &#43;
-          </button>
-
-          <!-- Recent Summits List (last 5 logged)-->
-          <span>Recent Logged Summits</span>
-          <ul id="recent-summits-list"></ul>
-        </div>
       </aside>
 
       <div id="view-wrapper">
