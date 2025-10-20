@@ -139,22 +139,19 @@
         <div id="my-summits-table" class="view"></div>
       </div>
 
-      <!-- Edit Summit Modal -->
-      <div id="edit-submission-modal" class="modal hidden">
+      <!-- Reusable Modal -->
+      <div
+        id="app-modal"
+        class="modal hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-body"
+      >
         <div class="modal-content">
-          <h3>Edit Summit</h3>
-          <form id="edit-form">
-            <div class="form-field">
-              <label for="edit-summit-date">Date climbed</label>
-              <input id="edit-summit-date" type="date" name="date" />
-            </div>
-            <div class="modal-actions">
-              <button type="button" id="cancel-edit" class="secondary-btn">
-                Cancel
-              </button>
-              <button type="submit" class="primary-btn">Save</button>
-            </div>
-          </form>
+          <h3 id="modal-title"></h3>
+          <div id="modal-body"></div>
+          <div class="modal-actions" id="modal-actions"></div>
         </div>
       </div>
 
