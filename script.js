@@ -63,6 +63,47 @@ tableRadio.addEventListener("change", () => {
   }
 });
 
+/* ===== Create Button Helper Functions ===== */
+
+// Button that navigates to Table view and highlights the peak being selected
+function createHighlightTableRowButton(peak) {
+  const btn = document.createElement("button");
+  btn.textContent = "View";
+  btn.classList.add("highlight-btn");
+  btn.addEventListener("click", () => {
+    if (!showingTable) {
+      mapView.classList.remove("active");
+      mySummitsTable.classList.add("active");
+      tableRadio.checked = true;
+      showingTable = true;
+      renderMySummitsTable(peak.id);
+    } else {
+      renderMySummitsTable(peak.id);
+    }
+  });
+  return btn;
+}
+
+// Icon Button that opens Delete Modal
+function createDeleteButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "delete-btn";
+  btn.textContent = "✕";
+  btn.setAttribute("aria-label", `Delete ${peak.name}`);
+  btn.onclick = () => openDeleteModal(peak);
+  return btn;
+}
+
+// Icon Button that opens Edit Modal
+function createEditButton(peak) {
+  const btn = document.createElement("button");
+  btn.className = "edit-btn";
+  btn.textContent = "✎";
+  btn.setAttribute("aria-label", `Edit ${peak.name}`);
+  btn.onclick = () => openEditModal(peak);
+  return btn;
+}
+
 /* ===== My Summits / Add Summit Form Toggle ===== */
 const myRecentSummitsContainer = document.getElementById(
   "my-recent-summits-container"
@@ -140,7 +181,7 @@ function renderRecentSummitsList() {
       </div>
     `;
 
-      const delBtn = createDeleteButton(peak);
+      const delBtn = createHighlightTableRowButton(peak);
       li.appendChild(delBtn);
       mySummitsList.appendChild(li);
     });
@@ -150,7 +191,7 @@ function renderRecentSummitsList() {
 }
 
 /* ===== My Summits - Table ===== */
-function renderMySummitsTable() {
+function renderMySummitsTable(highlightId = null) {
   mySummitsTable.innerHTML = "";
 
   const table = document.createElement("table");
@@ -172,53 +213,39 @@ function renderMySummitsTable() {
 
   // Sort peaks by date (newest first)
   const sortedPeaks = [...peaks].sort((a, b) => {
-    if (!a.date) return 1; // push undated to bottom
+    if (!a.date) return 1;
     if (!b.date) return -1;
     return new Date(b.date) - new Date(a.date);
   });
 
-  // if no summits, show message
   if (peaks.length === 0) {
     const h2 = document.createElement("h2");
     h2.textContent = "Add a summit to get started";
     mySummitsTable.appendChild(h2);
   } else {
-    // else, show table of summits
     sortedPeaks.forEach((peak) => {
       const tr = document.createElement("tr");
+      tr.setAttribute("data-peak-id", String(peak.id));
 
-      let dateCellContent = peak.date
+      const dateCellContent = peak.date
         ? formatDateUS(peak.date)
         : `<span class="no-date-badge">No date</span>`;
 
       tr.innerHTML = `
-      <td>${formatPeakName(peak.name)}</td>
-      <td>${getLocationFromPeakName(peak.name)}</td>
-      <td>
-        ${
+        <td>${formatPeakName(peak.name)}</td>
+        <td>${getLocationFromPeakName(peak.name)}</td>
+        <td>${
           peak.elevation
             ? peak.elevation.toLocaleString("en-US") + " ft"
             : " - "
-        }
-      </td>
-      <td>${dateCellContent}</td>
-    `;
-
-      tr.innerHTML = `
-      <td>${formatPeakName(peak.name)}</td>
-      <td>${getLocationFromPeakName(peak.name)}</td>
-      <td>${
-        peak.elevation ? peak.elevation.toLocaleString("en-US") + " ft" : " - "
-      }</td>
-      <td>${dateCellContent}</td>
-    `;
+        }</td>
+        <td>${dateCellContent}</td>
+      `;
 
       const actionTd = document.createElement("td");
       actionTd.className = "actions-td";
-
       actionTd.appendChild(createEditButton(peak));
       actionTd.appendChild(createDeleteButton(peak));
-
       tr.appendChild(actionTd);
 
       tbody.appendChild(tr);
@@ -226,6 +253,29 @@ function renderMySummitsTable() {
 
     table.appendChild(tbody);
     mySummitsTable.appendChild(table);
+
+    // Highlight after table is in the DOM
+    if (highlightId != null) {
+      const row = table.querySelector(
+        `tr[data-peak-id="${String(highlightId)}"]`
+      );
+      if (row) {
+        requestAnimationFrame(() => {
+          row.scrollIntoView({ behavior: "smooth", block: "center" });
+          row.classList.add("highlighted");
+
+          // Remove highlight on first user interaction
+          const clearHighlight = () => {
+            row.classList.remove("highlighted");
+            document.removeEventListener("click", clearHighlight);
+            document.removeEventListener("keydown", clearHighlight);
+          };
+
+          document.addEventListener("click", clearHighlight);
+          document.addEventListener("keydown", clearHighlight);
+        });
+      }
+    }
   }
 }
 
@@ -290,29 +340,31 @@ function renderMapMarkers() {
     if (peak.lat && peak.lon) {
       const popupHtml = `
       <div class="peak-popup">
-      <h5 class="peak-popup-heading">Logged Summit</h5>
-      <p class="peak-popup-data">
-          <span class="peak-popup-label">📍&nbsp;Summit</span>
-          <span class="peak-popup-value">${formatPeakName(peak.name)}</span>
-        </p>
-        ${
-          peak.elevation
-            ? `<p class="peak-popup-data">
-                <span class="peak-popup-label">↗️&nbsp;Elevation</span>
-                <span class="peak-popup-value">${peak.elevation.toLocaleString(
-                  "en-US"
-                )} ft</span>
+        <p class="peak-popup-data">
+            <span class="peak-popup-label">📍&nbsp;Summit</span>
+            <span class="peak-popup-value">${formatPeakName(peak.name)}</span>
+          </p>
+          ${
+            peak.elevation
+              ? `<p class="peak-popup-data">
+                  <span class="peak-popup-label">↗️&nbsp;Elevation</span>
+                  <span class="peak-popup-value">${peak.elevation.toLocaleString(
+                    "en-US"
+                  )} ft</span>
+                  </p>`
+              : ""
+          }
+          ${
+            peak.date
+              ? `<p class="peak-popup-data">
+                  <span class="peak-popup-label">🗓&nbsp;Latest</span>
+                  <span class="peak-popup-value">${formatDateUS(
+                    peak.date
+                  )}</span>
                 </p>`
-            : ""
-        }
-        ${
-          peak.date
-            ? `<p class="peak-popup-data">
-                <span class="peak-popup-label">🗓&nbsp;Latest</span>
-                <span class="peak-popup-value">${formatDateUS(peak.date)}</span>
-              </p>`
-            : ""
-        }
+              : ""
+          }
+          <div class="popup-actions"></div>
         </div>
       `;
 
@@ -323,6 +375,16 @@ function renderMapMarkers() {
           iconAnchor: [12, 12],
         }),
       }).bindPopup(popupHtml);
+
+      // When popup opens, inject the "View" button
+      marker.on("popupopen", (e) => {
+        const container = e.popup.getElement().querySelector(".popup-actions");
+        if (container) {
+          const btn = createHighlightTableRowButton(peak);
+          btn.textContent = "View";
+          container.appendChild(btn);
+        }
+      });
 
       userMarkersCluster.addLayer(marker);
     }
@@ -745,16 +807,6 @@ function closeModal() {
   }
 }
 
-// Icon Button that opens Edit Modal
-function createEditButton(peak) {
-  const btn = document.createElement("button");
-  btn.className = "edit-btn";
-  btn.textContent = "✎";
-  btn.setAttribute("aria-label", `Edit ${peak.name}`);
-  btn.onclick = () => openEditModal(peak);
-  return btn;
-}
-
 // Edit Modal
 function openEditModal(peak) {
   const form = document.createElement("form");
@@ -805,16 +857,6 @@ function openEditModal(peak) {
     body: form,
     actions: [cancelBtn, saveBtn],
   });
-}
-
-// Icon Button that opens Delete Modal
-function createDeleteButton(peak) {
-  const btn = document.createElement("button");
-  btn.className = "delete-btn";
-  btn.textContent = "✕";
-  btn.setAttribute("aria-label", `Delete ${peak.name}`);
-  btn.onclick = () => openDeleteModal(peak);
-  return btn;
 }
 
 // Delete Modal
