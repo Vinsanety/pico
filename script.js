@@ -119,23 +119,33 @@ function savePeaks() {
 /* ===== My Summits - List (last 5) ===== */
 function renderRecentSummitsList() {
   mySummitsList.innerHTML = "";
-  const recentPeaks = peaks.slice(-5).reverse();
 
-  recentPeaks.forEach((peak) => {
+  // if no summits, show message
+  if (peaks.length === 0) {
     const li = document.createElement("li");
-    li.innerHTML = `
+    li.textContent = "Add a summit to get started";
+    li.classList.add("muted");
+    mySummitsList.appendChild(li);
+  } else {
+    // else, show latest 5 logged
+    const recentSummits = peaks.slice(-5).reverse();
+    recentSummits.forEach((peak) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
       <div>
         <span>${formatPeakName(peak.name)}</span>
         <span class="muted">${
-          peak.date ? " on " + formatDateUS(peak.date) : ""
+          peak.date ? " on " + formatDateUS(peak.date) : "(no date added)"
         }</span>
       </div>
     `;
 
-    const delBtn = createDeleteButton(peak);
-    li.appendChild(delBtn);
-    mySummitsList.appendChild(li);
-  });
+      const delBtn = createDeleteButton(peak);
+      li.appendChild(delBtn);
+      mySummitsList.appendChild(li);
+    });
+  }
+
   mySummitCount.textContent = peaks.length;
 }
 
@@ -149,7 +159,7 @@ function renderMySummitsTable() {
   const thead = document.createElement("thead");
   thead.innerHTML = `
     <tr>
-      <th>Name</th>
+      <th>Summit</th>
       <th>Location</th>
       <th>Elevation (ft)</th>
       <th>Date</th>
@@ -167,14 +177,21 @@ function renderMySummitsTable() {
     return new Date(b.date) - new Date(a.date);
   });
 
-  sortedPeaks.forEach((peak) => {
-    const tr = document.createElement("tr");
+  // if no summits, show message
+  if (peaks.length === 0) {
+    const h2 = document.createElement("h2");
+    h2.textContent = "Add a summit to get started";
+    mySummitsTable.appendChild(h2);
+  } else {
+    // else, show table of summits
+    sortedPeaks.forEach((peak) => {
+      const tr = document.createElement("tr");
 
-    let dateCellContent = peak.date
-      ? formatDateUS(peak.date)
-      : `<span class="no-date-badge">No date</span>`;
+      let dateCellContent = peak.date
+        ? formatDateUS(peak.date)
+        : `<span class="no-date-badge">No date</span>`;
 
-    tr.innerHTML = `
+      tr.innerHTML = `
       <td>${formatPeakName(peak.name)}</td>
       <td>${getLocationFromPeakName(peak.name)}</td>
       <td>
@@ -187,7 +204,7 @@ function renderMySummitsTable() {
       <td>${dateCellContent}</td>
     `;
 
-    tr.innerHTML = `
+      tr.innerHTML = `
       <td>${formatPeakName(peak.name)}</td>
       <td>${getLocationFromPeakName(peak.name)}</td>
       <td>${
@@ -196,19 +213,20 @@ function renderMySummitsTable() {
       <td>${dateCellContent}</td>
     `;
 
-    const actionTd = document.createElement("td");
-    actionTd.className = "actions-td";
+      const actionTd = document.createElement("td");
+      actionTd.className = "actions-td";
 
-    actionTd.appendChild(createEditButton(peak));
-    actionTd.appendChild(createDeleteButton(peak));
+      actionTd.appendChild(createEditButton(peak));
+      actionTd.appendChild(createDeleteButton(peak));
 
-    tr.appendChild(actionTd);
+      tr.appendChild(actionTd);
 
-    tbody.appendChild(tr);
-  });
+      tbody.appendChild(tr);
+    });
 
-  table.appendChild(tbody);
-  mySummitsTable.appendChild(table);
+    table.appendChild(tbody);
+    mySummitsTable.appendChild(table);
+  }
 }
 
 /* ===== Date Input ===== */
