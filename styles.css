@@ -121,6 +121,7 @@ header .header-logo {
 .summits-table td {
   border: 1px solid var(--border-light);
   padding: 0.5rem 0.875rem;
+  transition: var(--transition-all);
 }
 .summits-table .actions-td {
   text-align: center;
@@ -131,6 +132,16 @@ header .header-logo {
   margin: 0 0.25rem;
   vertical-align: middle;
 }
+
+/* Highlighted state */
+.summits-table tr.highlighted {
+  background-color: rgba(240, 180, 41, 0.25);
+  transition: background-color 0.3s ease;
+}
+.summits-table tr.highlighted td {
+  font-weight: 600;
+}
+
 .summits-table .no-date-badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -404,6 +415,64 @@ button.btn-destructive:focus {
 button.btn-destructive:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+}
+
+.highlight-table-row-btn {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease,
+    transform 0.15s ease;
+}
+
+.highlight-table-row-btn:hover {
+  background-color: var(--accent);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.highlight-table-row-btn:active {
+  transform: translateY(0);
+}
+
+.highlight-table-row-btn:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.show-on-map-btn {
+  background: transparent;
+  color: var(--secondary);
+  border: 2px solid var(--secondary);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease,
+    transform 0.15s ease;
+}
+
+.show-on-map-btn:hover {
+  background-color: var(--secondary);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.show-on-map-btn:active {
+  background-color: var(--secondary-dim);
+  color: var(--text);
+  transform: translateY(0);
+}
+
+.show-on-map-btn:focus {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
 }
 
 #peak-suggestions {
@@ -721,13 +790,12 @@ ul#recent-summits-list li span.elevation {
 .peak-popup .peak-popup-data {
   min-width: 150px;
   margin: 0.75rem 0 0;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px dashed #374151;
+  padding-bottom: 0.5rem;
 }
 
 .peak-popup .peak-popup-data:last-child {
   border-bottom: none;
-  padding-bottom: 0.125rem;
+  padding-bottom: 0;
 }
 
 .peak-popup .peak-popup-label {
@@ -735,7 +803,7 @@ ul#recent-summits-list li span.elevation {
   color: var(--muted);
   font-size: 0.8125rem;
   font-weight: 600;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.25rem;
 }
 
 .peak-popup .peak-popup-value {
@@ -745,6 +813,11 @@ ul#recent-summits-list li span.elevation {
 
 .leaflet-popup-tip {
   background: #111b2d;
+}
+
+.peak-popup .popup-actions {
+  width: 100%;
+  margin-top: 1rem;
 }
 
 /* == MAP: Custom Pin/Marker == */
