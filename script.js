@@ -65,10 +65,10 @@ tableRadio.addEventListener("change", () => {
 
 /* ===== Create Button Helper Functions ===== */
 
-// Button that navigates to Table view and highlights the peak being selected
+// Button that navigates and higlights to Table view summit
 function createHighlightTableRowButton(peak) {
   const btn = document.createElement("button");
-  btn.textContent = "View";
+  btn.textContent = "Table";
   btn.classList.add("highlight-btn");
   btn.addEventListener("click", () => {
     if (!showingTable) {
@@ -84,7 +84,7 @@ function createHighlightTableRowButton(peak) {
   return btn;
 }
 
-// Icon Button that opens Delete Modal
+// Icon Button that opens Delete Summit Modal
 function createDeleteButton(peak) {
   const btn = document.createElement("button");
   btn.className = "delete-btn";
@@ -94,13 +94,47 @@ function createDeleteButton(peak) {
   return btn;
 }
 
-// Icon Button that opens Edit Modal
+// Icon Button that opens Edit Summit Modal
 function createEditButton(peak) {
   const btn = document.createElement("button");
   btn.className = "edit-btn";
   btn.textContent = "✎";
   btn.setAttribute("aria-label", `Edit ${peak.name}`);
   btn.onclick = () => openEditModal(peak);
+  return btn;
+}
+
+// Button that shows Summit on Map
+function createShowOnMapButton(peak) {
+  const btn = document.createElement("button");
+  btn.textContent = "Map";
+  btn.classList.add("map-btn");
+
+  btn.addEventListener("click", () => {
+    if (peak.lat && peak.lon) {
+      // switch to map view
+      mySummitsTable.classList.remove("active");
+      mapView.classList.add("active");
+      tableRadio.checked = false;
+      mapRadio.checked = true;
+      showingTable = false;
+
+      // pan/zoom to the peak
+      map.setView([peak.lat, peak.lon], 12, { animate: true });
+
+      // optionally open its popup if you’ve bound one
+      // find the marker for this peak and open popup
+      userMarkersCluster.eachLayer((layer) => {
+        if (
+          layer.getLatLng &&
+          layer.getLatLng().lat === peak.lat &&
+          layer.getLatLng().lng === peak.lon
+        ) {
+          layer.openPopup();
+        }
+      });
+    }
+  });
   return btn;
 }
 
@@ -194,19 +228,27 @@ function renderRecentSummitsList() {
 function renderMySummitsTable(highlightId = null) {
   mySummitsTable.innerHTML = "";
 
+  if (peaks.length === 0) {
+    const h2 = document.createElement("h2");
+    h2.textContent = "Add a summit to get started";
+    mySummitsTable.appendChild(h2);
+    return;
+  }
+
   const table = document.createElement("table");
   table.className = "summits-table";
 
+  // Build header
   const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr>
-      <th>Summit</th>
-      <th>Location</th>
-      <th>Elevation (ft)</th>
-      <th>Date</th>
-      <th>Actions</th>
-    </tr>
-  `;
+  const headerRow = document.createElement("tr");
+  ["Summit", "Location", "Elevation (ft)", "Date", "Actions"].forEach(
+    (title) => {
+      const th = document.createElement("th");
+      th.textContent = title;
+      headerRow.appendChild(th);
+    }
+  );
+  thead.appendChild(headerRow);
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
@@ -218,63 +260,72 @@ function renderMySummitsTable(highlightId = null) {
     return new Date(b.date) - new Date(a.date);
   });
 
-  if (peaks.length === 0) {
-    const h2 = document.createElement("h2");
-    h2.textContent = "Add a summit to get started";
-    mySummitsTable.appendChild(h2);
-  } else {
-    sortedPeaks.forEach((peak) => {
-      const tr = document.createElement("tr");
-      tr.setAttribute("data-peak-id", String(peak.id));
+  sortedPeaks.forEach((peak) => {
+    const tr = document.createElement("tr");
+    tr.dataset.peakId = String(peak.id);
 
-      const dateCellContent = peak.date
-        ? formatDateUS(peak.date)
-        : `<span class="no-date-badge">No date</span>`;
+    // Summit cell
+    const summitTd = document.createElement("td");
+    summitTd.textContent = formatPeakName(peak.name);
+    tr.appendChild(summitTd);
 
-      tr.innerHTML = `
-        <td>${formatPeakName(peak.name)}</td>
-        <td>${getLocationFromPeakName(peak.name)}</td>
-        <td>${
-          peak.elevation
-            ? peak.elevation.toLocaleString("en-US") + " ft"
-            : " - "
-        }</td>
-        <td>${dateCellContent}</td>
-      `;
+    // Location cell
+    const locationTd = document.createElement("td");
+    locationTd.textContent = getLocationFromPeakName(peak.name);
+    tr.appendChild(locationTd);
 
-      const actionTd = document.createElement("td");
-      actionTd.className = "actions-td";
-      actionTd.appendChild(createEditButton(peak));
-      actionTd.appendChild(createDeleteButton(peak));
-      tr.appendChild(actionTd);
+    // Elevation cell
+    const elevTd = document.createElement("td");
+    elevTd.textContent = peak.elevation
+      ? `${peak.elevation.toLocaleString("en-US")} ft`
+      : " - ";
+    tr.appendChild(elevTd);
 
-      tbody.appendChild(tr);
-    });
+    // Date cell
+    const dateTd = document.createElement("td");
+    if (peak.date) {
+      dateTd.textContent = formatDateUS(peak.date);
+    } else {
+      const badge = document.createElement("span");
+      badge.className = "no-date-badge";
+      badge.textContent = "No date";
+      dateTd.appendChild(badge);
+    }
+    tr.appendChild(dateTd);
 
-    table.appendChild(tbody);
-    mySummitsTable.appendChild(table);
+    // Actions cell
+    const actionTd = document.createElement("td");
+    actionTd.className = "actions-td";
+    actionTd.appendChild(createShowOnMapButton(peak));
+    actionTd.appendChild(createEditButton(peak));
+    actionTd.appendChild(createDeleteButton(peak));
+    tr.appendChild(actionTd);
 
-    // Highlight after table is in the DOM
-    if (highlightId != null) {
-      const row = table.querySelector(
-        `tr[data-peak-id="${String(highlightId)}"]`
-      );
-      if (row) {
-        requestAnimationFrame(() => {
-          row.scrollIntoView({ behavior: "smooth", block: "center" });
-          row.classList.add("highlighted");
+    tbody.appendChild(tr);
+  });
 
-          // Remove highlight on first user interaction
-          const clearHighlight = () => {
-            row.classList.remove("highlighted");
-            document.removeEventListener("click", clearHighlight);
-            document.removeEventListener("keydown", clearHighlight);
-          };
+  table.appendChild(tbody);
+  mySummitsTable.appendChild(table);
 
-          document.addEventListener("click", clearHighlight);
-          document.addEventListener("keydown", clearHighlight);
-        });
-      }
+  // Highlight after table is in the DOM
+  if (highlightId != null) {
+    const row = table.querySelector(
+      `tr[data-peak-id="${String(highlightId)}"]`
+    );
+    if (row) {
+      requestAnimationFrame(() => {
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+        row.classList.add("highlighted");
+
+        const clearHighlight = () => {
+          row.classList.remove("highlighted");
+          document.removeEventListener("click", clearHighlight);
+          document.removeEventListener("keydown", clearHighlight);
+        };
+
+        document.addEventListener("click", clearHighlight);
+        document.addEventListener("keydown", clearHighlight);
+      });
     }
   }
 }
@@ -334,57 +385,85 @@ function initMap() {
 }
 
 /* ===== Render Map Markers ===== */
+function buildPopup(peak) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "peak-popup";
+
+  // Summit
+  const summitP = document.createElement("p");
+  summitP.className = "peak-popup-data";
+
+  const summitLabel = document.createElement("span");
+  summitLabel.className = "peak-popup-label";
+  summitLabel.textContent = "📍 Summit";
+
+  const summitValue = document.createElement("span");
+  summitValue.className = "peak-popup-value";
+  summitValue.textContent = formatPeakName(peak.name);
+
+  summitP.appendChild(summitLabel);
+  summitP.appendChild(summitValue);
+  wrapper.appendChild(summitP);
+
+  // Elevation
+  if (peak.elevation) {
+    const elevP = document.createElement("p");
+    elevP.className = "peak-popup-data";
+
+    const elevLabel = document.createElement("span");
+    elevLabel.className = "peak-popup-label";
+    elevLabel.textContent = "↗️ Elevation";
+
+    const elevValue = document.createElement("span");
+    elevValue.className = "peak-popup-value";
+    elevValue.textContent = `${peak.elevation.toLocaleString("en-US")} ft`;
+
+    elevP.appendChild(elevLabel);
+    elevP.appendChild(elevValue);
+    wrapper.appendChild(elevP);
+  }
+
+  // Date
+  if (peak.date) {
+    const dateP = document.createElement("p");
+    dateP.className = "peak-popup-data";
+
+    const dateLabel = document.createElement("span");
+    dateLabel.className = "peak-popup-label";
+    dateLabel.textContent = "🗓 Latest";
+
+    const dateValue = document.createElement("span");
+    dateValue.className = "peak-popup-value";
+    dateValue.textContent = formatDateUS(peak.date);
+
+    dateP.appendChild(dateLabel);
+    dateP.appendChild(dateValue);
+    wrapper.appendChild(dateP);
+  }
+
+  // Actions container with "Table" button
+  const actions = document.createElement("div");
+  actions.className = "popup-actions";
+  const tableBtn = createHighlightTableRowButton(peak);
+  tableBtn.textContent = "Table";
+  actions.appendChild(tableBtn);
+  wrapper.appendChild(actions);
+
+  return wrapper;
+}
+
 function renderMapMarkers() {
   userMarkersCluster.clearLayers();
+
   peaks.forEach((peak) => {
     if (peak.lat && peak.lon) {
-      const popupHtml = `
-      <div class="peak-popup">
-        <p class="peak-popup-data">
-            <span class="peak-popup-label">📍&nbsp;Summit</span>
-            <span class="peak-popup-value">${formatPeakName(peak.name)}</span>
-          </p>
-          ${
-            peak.elevation
-              ? `<p class="peak-popup-data">
-                  <span class="peak-popup-label">↗️&nbsp;Elevation</span>
-                  <span class="peak-popup-value">${peak.elevation.toLocaleString(
-                    "en-US"
-                  )} ft</span>
-                  </p>`
-              : ""
-          }
-          ${
-            peak.date
-              ? `<p class="peak-popup-data">
-                  <span class="peak-popup-label">🗓&nbsp;Latest</span>
-                  <span class="peak-popup-value">${formatDateUS(
-                    peak.date
-                  )}</span>
-                </p>`
-              : ""
-          }
-          <div class="popup-actions"></div>
-        </div>
-      `;
-
       const marker = L.marker([peak.lat, peak.lon], {
         icon: L.divIcon({
           className: "custom-marker",
           iconSize: [24, 24],
           iconAnchor: [12, 12],
         }),
-      }).bindPopup(popupHtml);
-
-      // When popup opens, inject the "View" button
-      marker.on("popupopen", (e) => {
-        const container = e.popup.getElement().querySelector(".popup-actions");
-        if (container) {
-          const btn = createHighlightTableRowButton(peak);
-          btn.textContent = "View";
-          container.appendChild(btn);
-        }
-      });
+      }).bindPopup(buildPopup(peak));
 
       userMarkersCluster.addLayer(marker);
     }

@@ -432,7 +432,7 @@ button.btn-destructive:active {
 
 .highlight-btn:hover {
   background-color: var(--accent);
-  color: var(--dark);
+  color: var(--text);
   transform: translateY(-1px);
 }
 
@@ -442,6 +442,36 @@ button.btn-destructive:active {
 
 .highlight-btn:focus {
   outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.map-btn {
+  background: transparent;
+  color: var(--secondary);
+  border: 2px solid var(--secondary);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease,
+    transform 0.15s ease;
+}
+
+.map-btn:hover {
+  background-color: var(--secondary);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.map-btn:active {
+  background-color: var(--secondary-dim);
+  color: var(--text);
+  transform: translateY(0);
+}
+
+.map-btn:focus {
+  outline: 2px solid var(--secondary);
   outline-offset: 2px;
 }
 
