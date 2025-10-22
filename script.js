@@ -192,6 +192,7 @@ function savePeaks() {
 
 /* ===== My Summits - List (last 5) ===== */
 function renderRecentSummitsList() {
+  // clear the list
   mySummitsList.innerHTML = "";
 
   // if no summits, show message
@@ -203,19 +204,29 @@ function renderRecentSummitsList() {
   } else {
     // else, show latest 5 logged
     const recentSummits = peaks.slice(-5).reverse();
+
     recentSummits.forEach((peak) => {
       const li = document.createElement("li");
-      li.innerHTML = `
-      <div>
-        <span>${formatPeakName(peak.name)}</span>
-        <span class="muted">${
-          peak.date ? " on " + formatDateUS(peak.date) : "(no date added)"
-        }</span>
-      </div>
-    `;
+
+      const wrapper = document.createElement("div");
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = formatPeakName(peak.name);
+
+      const dateSpan = document.createElement("span");
+      dateSpan.classList.add("muted");
+      dateSpan.textContent = peak.date
+        ? " on " + formatDateUS(peak.date)
+        : " (no date added)";
+
+      wrapper.appendChild(nameSpan);
+      wrapper.appendChild(dateSpan);
+
+      li.appendChild(wrapper);
 
       const showTableBtn = createHighlightTableRowButton(peak);
       li.appendChild(showTableBtn);
+
       mySummitsList.appendChild(li);
     });
   }
@@ -507,16 +518,13 @@ previewModeBanner.addEventListener("click", () => showAddPeakPreview(null));
 function showAddPeakPreview(peakData) {
   if (!peakData) {
     previewModeBanner.classList.remove("show");
-    addSummmitPreview.innerHTML = "";
+
+    // Clear children
+    addSummmitPreview.replaceChildren();
     addSummmitPreview.classList.remove("show");
 
-    if (summitInput) {
-      summitInput.value = "";
-    }
-
-    if (dateInput) {
-      dateInput.value = "";
-    }
+    if (summitInput) summitInput.value = "";
+    if (dateInput) dateInput.value = "";
 
     if (previewMarker) {
       map.removeLayer(previewMarker);
@@ -529,35 +537,72 @@ function showAddPeakPreview(peakData) {
   previewModeBanner.classList.add("show");
   addSummmitPreview.classList.add("show");
 
-  addSummmitPreview.innerHTML = `
-  <h5 class="muted">Peak to add</h5>
-    ${
-      dateInput.value
-        ? `<p class="preview-data">
-            <span class="preview-label">Date:</span>
-            <span class="preview-value">
-              ${formatDateUS(dateInput.value)}
-            </span>
-          </p>`
-        : ""
-    }
-    <p class="preview-data">
-      <span class="preview-label">Summit:</span>
-      <span class="preview-value">${peakData.name}</span>
-    </p>
-    ${
-      peakData.elevation
-        ? `<p class="preview-data">
-            <span class="preview-label">Elevation:</span>
-            <span class="preview-value">${peakData.elevation} ft</span>
-          </p>`
-        : ""
-    }
-  `;
+  // Clear previous preview
+  addSummmitPreview.replaceChildren();
 
+  // Heading
+  const heading = document.createElement("h5");
+  heading.classList.add("muted");
+  heading.textContent = "Peak to add";
+  addSummmitPreview.appendChild(heading);
+
+  // Date (if provided)
+  if (dateInput.value) {
+    const p = document.createElement("p");
+    p.classList.add("preview-data");
+
+    const label = document.createElement("span");
+    label.classList.add("preview-label");
+    label.textContent = "Date:";
+
+    const value = document.createElement("span");
+    value.classList.add("preview-value");
+    value.textContent = formatDateUS(dateInput.value);
+
+    p.appendChild(label);
+    p.appendChild(value);
+    addSummmitPreview.appendChild(p);
+  }
+
+  // Summit name
+  const summitP = document.createElement("p");
+  summitP.classList.add("preview-data");
+
+  const summitLabel = document.createElement("span");
+  summitLabel.classList.add("preview-label");
+  summitLabel.textContent = "Summit:";
+
+  const summitValue = document.createElement("span");
+  summitValue.classList.add("preview-value");
+  summitValue.textContent = peakData.name;
+
+  summitP.appendChild(summitLabel);
+  summitP.appendChild(summitValue);
+  addSummmitPreview.appendChild(summitP);
+
+  // Elevation (if provided)
+  if (peakData.elevation) {
+    const p = document.createElement("p");
+    p.classList.add("preview-data");
+
+    const label = document.createElement("span");
+    label.classList.add("preview-label");
+    label.textContent = "Elevation:";
+
+    const value = document.createElement("span");
+    value.classList.add("preview-value");
+    value.textContent = `${peakData.elevation} ft`;
+
+    p.appendChild(label);
+    p.appendChild(value);
+    addSummmitPreview.appendChild(p);
+  }
+
+  // Map marker
   if (peakData.lat && peakData.lon) {
     map.setView([peakData.lat, peakData.lon], 8);
     if (previewMarker) map.removeLayer(previewMarker);
+
     previewMarker = L.marker([peakData.lat, peakData.lon])
       .addTo(map)
       .bindPopup(
@@ -589,18 +634,24 @@ function filterSummits(results) {
 /* ===== Typeahead Autocomplete (OSM + Elevation) ===== */
 let debounceTimer;
 
+// Utility to clear suggestions
+function clearSuggestions() {
+  peakSuggestions.replaceChildren(); // clears all children
+  peakSuggestions.classList.remove("show");
+}
+
 summitInput.addEventListener("input", () => {
   const query = summitInput.value.trim();
   clearTimeout(debounceTimer);
 
   if (query.length < 2) {
-    peakSuggestions.innerHTML = "";
-    peakSuggestions.classList.remove("show");
+    clearSuggestions();
     return;
   }
 
   debounceTimer = setTimeout(async () => {
-    peakSuggestions.innerHTML = "";
+    clearSuggestions();
+
     // Show spinner while fetching
     const spinner = document.createElement("li");
     spinner.className = "spinner";
@@ -617,7 +668,8 @@ summitInput.addEventListener("input", () => {
 
       const results = await res.json();
       const peaksOnly = filterSummits(results);
-      peakSuggestions.innerHTML = "";
+
+      clearSuggestions();
 
       if (peaksOnly.length > 0) {
         peakSuggestions.classList.add("show");
@@ -625,6 +677,7 @@ summitInput.addEventListener("input", () => {
         for (const r of peaksOnly.slice(0, 5)) {
           const li = document.createElement("li");
           li.textContent = r.display_name;
+
           li.addEventListener("click", async () => {
             const lat = parseFloat(r.lat);
             const lon = parseFloat(r.lon);
@@ -638,8 +691,7 @@ summitInput.addEventListener("input", () => {
               r.address.city || r.address.town || r.address.village || "";
             summitInput.dataset.state = r.address.state || "";
 
-            peakSuggestions.innerHTML = "";
-            peakSuggestions.classList.remove("show");
+            clearSuggestions();
 
             showAddPeakPreview({
               name: r.display_name,
@@ -650,6 +702,7 @@ summitInput.addEventListener("input", () => {
               state: summitInput.dataset.state,
             });
           });
+
           peakSuggestions.appendChild(li);
         }
       } else {
@@ -661,11 +714,11 @@ summitInput.addEventListener("input", () => {
       }
     } catch (err) {
       console.error("Autocomplete error:", err);
-      peakSuggestions.innerHTML = "";
-      peakSuggestions.classList.remove("show");
+      clearSuggestions();
     }
   }, 300);
 });
+
 // Close peakSuggestions if clicking outside
 document.addEventListener("click", (e) => {
   if (!peakSuggestions.contains(e.target) && e.target !== summitInput) {
