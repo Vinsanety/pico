@@ -52,6 +52,7 @@ mapRadio.addEventListener("change", () => {
     mapView.classList.add("active");
     renderMapMarkers();
     showingTable = false;
+    map.fitBounds(usaBounds);
   }
 });
 tableRadio.addEventListener("change", () => {
@@ -69,7 +70,7 @@ tableRadio.addEventListener("change", () => {
 function createHighlightTableRowButton(peak) {
   const btn = document.createElement("button");
   btn.textContent = "Table";
-  btn.classList.add("highlight-btn");
+  btn.classList.add("highlight-table-row-btn");
   btn.addEventListener("click", () => {
     if (!showingTable) {
       mapView.classList.remove("active");
@@ -108,33 +109,31 @@ function createEditButton(peak) {
 function createShowOnMapButton(peak) {
   const btn = document.createElement("button");
   btn.textContent = "Map";
-  btn.classList.add("map-btn");
+  btn.classList.add("show-on-map-btn");
 
   btn.addEventListener("click", () => {
-    if (peak.lat && peak.lon) {
-      // switch to map view
-      mySummitsTable.classList.remove("active");
-      mapView.classList.add("active");
-      tableRadio.checked = false;
-      mapRadio.checked = true;
-      showingTable = false;
+    if (!peak.lat || !peak.lon) return;
 
-      // pan/zoom to the peak
-      map.setView([peak.lat, peak.lon], 12, { animate: true });
+    // switch to map view
+    mySummitsTable.classList.remove("active");
+    mapView.classList.add("active");
+    tableRadio.checked = false;
+    mapRadio.checked = true;
+    showingTable = false;
 
-      // optionally open its popup if you’ve bound one
-      // find the marker for this peak and open popup
-      userMarkersCluster.eachLayer((layer) => {
-        if (
-          layer.getLatLng &&
-          layer.getLatLng().lat === peak.lat &&
-          layer.getLatLng().lng === peak.lon
-        ) {
-          layer.openPopup();
-        }
-      });
-    }
+    const marker = markersById.get(peak.id);
+    if (!marker) return;
+
+    userMarkersCluster.zoomToShowLayer(marker, () => {
+      if (map.getZoom() < 8) {
+        map.setView(marker.getLatLng(), 8);
+      } else {
+        map.panTo(marker.getLatLng());
+      }
+      marker.openPopup();
+    });
   });
+
   return btn;
 }
 
@@ -215,8 +214,8 @@ function renderRecentSummitsList() {
       </div>
     `;
 
-      const delBtn = createHighlightTableRowButton(peak);
-      li.appendChild(delBtn);
+      const showTableBtn = createHighlightTableRowButton(peak);
+      li.appendChild(showTableBtn);
       mySummitsList.appendChild(li);
     });
   }
@@ -393,15 +392,10 @@ function buildPopup(peak) {
   const summitP = document.createElement("p");
   summitP.className = "peak-popup-data";
 
-  const summitLabel = document.createElement("span");
-  summitLabel.className = "peak-popup-label";
-  summitLabel.textContent = "📍 Summit";
-
   const summitValue = document.createElement("span");
   summitValue.className = "peak-popup-value";
-  summitValue.textContent = formatPeakName(peak.name);
+  summitValue.textContent = `📍 ${formatPeakName(peak.name)}`;
 
-  summitP.appendChild(summitLabel);
   summitP.appendChild(summitValue);
   wrapper.appendChild(summitP);
 
@@ -412,7 +406,7 @@ function buildPopup(peak) {
 
     const elevLabel = document.createElement("span");
     elevLabel.className = "peak-popup-label";
-    elevLabel.textContent = "↗️ Elevation";
+    elevLabel.textContent = "Elevation";
 
     const elevValue = document.createElement("span");
     elevValue.className = "peak-popup-value";
@@ -430,7 +424,7 @@ function buildPopup(peak) {
 
     const dateLabel = document.createElement("span");
     dateLabel.className = "peak-popup-label";
-    dateLabel.textContent = "🗓 Latest";
+    dateLabel.textContent = "Latest";
 
     const dateValue = document.createElement("span");
     dateValue.className = "peak-popup-value";
@@ -441,32 +435,53 @@ function buildPopup(peak) {
     wrapper.appendChild(dateP);
   }
 
-  // Actions container with "Table" button
-  const actions = document.createElement("div");
-  actions.className = "popup-actions";
+  // Table action button
   const tableBtn = createHighlightTableRowButton(peak);
-  tableBtn.textContent = "Table";
-  actions.appendChild(tableBtn);
-  wrapper.appendChild(actions);
+  tableBtn.classList.add("popup-actions");
+  tableBtn.textContent = "View Table";
+  wrapper.appendChild(tableBtn);
 
   return wrapper;
 }
 
+const markersById = new Map();
+
 function renderMapMarkers() {
   userMarkersCluster.clearLayers();
+  markersById.clear();
 
   peaks.forEach((peak) => {
-    if (peak.lat && peak.lon) {
-      const marker = L.marker([peak.lat, peak.lon], {
-        icon: L.divIcon({
-          className: "custom-marker",
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-        }),
-      }).bindPopup(buildPopup(peak));
+    if (!peak.lat || !peak.lon) return;
 
-      userMarkersCluster.addLayer(marker);
-    }
+    // bind popup with autoPan and padding so it stays in view
+    const popup = L.popup({
+      autoPan: true,
+      autoPanPadding: L.point(40, 30),
+      maxWidth: 280,
+    }).setContent(buildPopup(peak));
+
+    const marker = L.marker([peak.lat, peak.lon], {
+      icon: L.divIcon({
+        className: "custom-marker",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      }),
+    }).bindPopup(popup);
+
+    // when marker is clicked, expand cluster if needed, then zoom/pan and open popup
+    marker.on("click", () => {
+      userMarkersCluster.zoomToShowLayer(marker, () => {
+        if (map.getZoom() < 8) {
+          map.setView(marker.getLatLng(), 8);
+        } else {
+          map.panTo(marker.getLatLng());
+        }
+        marker.openPopup();
+      });
+    });
+
+    markersById.set(peak.id, marker);
+    userMarkersCluster.addLayer(marker);
   });
 }
 
