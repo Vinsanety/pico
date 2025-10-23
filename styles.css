@@ -515,6 +515,7 @@ ul#peak-suggestions li {
 
 ul#peak-suggestions li:hover {
   background: #0f1a30;
+  border-radius: 8px;
 }
 
 ul#recent-summits-list li span.elevation {
