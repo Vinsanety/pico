@@ -67,15 +67,19 @@ aside {
   padding: 16px;
   overflow-y: auto;
 }
-aside header {
+aside header.desktop-header {
   background: var(--panel);
   text-align: center;
   padding: 1rem;
   border-bottom: 1px solid var(--border);
 }
-header .header-logo {
+aside header.desktop-header .header-logo {
   max-width: 240px;
   margin-bottom: 0.5rem;
+}
+
+header.mobile-header {
+  display: none;
 }
 
 /* ===== MAIN VIEW (WRAPPER) ===== */
@@ -380,7 +384,7 @@ button.secondary-btn:active {
 }
 
 button#add-summit-btn {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 button.btn-destructive {
@@ -979,7 +983,7 @@ footer .copyright {
 }
 
 /* ===== MOBILE LAYOUT ===== */
-@media (max-width: 667px) {
+@media (max-width: 500px) {
   .app {
     display: flex;
     flex-direction: column;
@@ -989,6 +993,11 @@ footer .copyright {
     order: 1;
     height: 45vh;
   }
+  header.mobile-header {
+    display: block;
+    width: 170px;
+    margin: 0 auto;
+  }
   aside {
     order: 2;
     height: auto;
@@ -996,14 +1005,12 @@ footer .copyright {
     border-right: none;
     border-top: 1px solid var(--border);
   }
-  aside header {
+  aside header.desktop-header {
+    display: none;
     padding: 0;
   }
-  aside header img {
+  aside header.desktop-header img {
     width: 175px;
     padding: 0;
-  }
-  aside header .subheader {
-    display: none;
   }
 }
