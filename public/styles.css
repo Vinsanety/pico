@@ -56,8 +56,8 @@ body {
   grid-template-columns: 360px 1fr;
   /* grid-template-rows: calc(
     100vh - 32px
-  ); // correct height without .banner */
-  grid-template-rows: calc(100vh - 69px); // height WITH .banner
+  ); */
+  grid-template-rows: calc(100vh - 69px); /* height WITH .banner */
 }
 
 /* ===== ASIDE / FORM ===== */
@@ -173,6 +173,7 @@ header.mobile-header {
 }
 .modal-content {
   background: var(--panel);
+  margin: 1rem;
   padding: 1.5rem;
   line-height: 1.5;
   border-radius: 0.5rem;
