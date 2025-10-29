@@ -781,7 +781,7 @@ function processQueue() {
       activeToasts--;
       processQueue();
     }, 250);
-  }, 5000);
+  }, 1115000);
 }
 
 /* ===== Add Summit Form Submission ===== */
@@ -861,7 +861,13 @@ addSummitForm.addEventListener("submit", async (e) => {
   renderRecentSummitsList();
   renderMySummitsTable();
   renderMapMarkers();
-  showToast(`Added ${name}`, "success");
+  showToast(
+    `Added ${formatPeakName(name)}${
+      date ? " on " + formatDateUS(date) : " (no date added)"
+    }`,
+    "success"
+  );
+
   addSummitForm.reset();
   summitInput.dataset.lat = "";
   summitInput.dataset.lon = "";
@@ -1006,7 +1012,12 @@ function openEditModal(peak) {
       renderMySummitsTable();
       renderRecentSummitsList();
       renderMapMarkers();
-      showToast(`Updated date for ${peaks[idx].name}`, "success");
+      showToast(
+        `Updated date for ${formatPeakName(peaks[idx].name)}${
+          peaks[idx].date ? " on " + formatDateUS(peaks[idx].date) : ""
+        }`,
+        "success"
+      );
     }
     closeModal();
   };
@@ -1042,7 +1053,13 @@ function openDeleteModal(peak) {
     renderRecentSummitsList();
     renderMySummitsTable();
     renderMapMarkers();
-    showToast(`Removed ${peak.name}`, "destructive");
+    showToast(
+      `Removed ${formatPeakName(peak.name)}${
+        peak.date ? " on " + formatDateUS(peak.date) : ""
+      }`,
+      "destructive"
+    );
+
     closeModal();
   };
 
