@@ -239,11 +239,15 @@ function renderMySummitsTable(highlightId = null) {
   mySummitsTable.innerHTML = "";
 
   if (peaks.length === 0) {
-    const h2 = document.createElement("h2");
-    h2.textContent = "Add a summit to get started";
-    mySummitsTable.appendChild(h2);
+    const p = document.createElement("p");
+    p.textContent = "Add a summit to get started";
+    mySummitsTable.appendChild(p);
     return;
   }
+
+  const h3 = document.createElement("h3");
+  h3.textContent = "My Summits";
+  mySummitsTable.appendChild(h3);
 
   const table = document.createElement("table");
   table.className = "summits-table";

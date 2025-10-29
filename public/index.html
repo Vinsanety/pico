@@ -36,14 +36,10 @@
   <body>
     <div class="banner">⚠️ Prototype Demo — Work in Progress ⚠️</div>
 
-    <header class="mobile-header">
-      <img src="/logo/Pico-Summit-Log_FULL-LOGO.svg" alt="Pico Summit Log" />
-    </header>
-
     <div class="app">
       <!-- Sidebar -->
       <aside>
-        <header class="desktop-header">
+        <header>
           <img
             src="/logo/Pico-Summit-Log_FULL-LOGO.svg"
             alt="Pico Summit Log"
@@ -52,15 +48,6 @@
             Log summits and track your progress.
           </div>
         </header>
-        <!-- Map/Table Toggle Button -->
-        <div class="toggle-view-container">
-          <!-- Map Radio -->
-          <input type="radio" id="map-view-radio" name="view" checked />
-          <label for="map-view-radio">Map</label>
-          <!-- Table Radio -->
-          <input type="radio" id="table-view-radio" name="view" />
-          <label for="table-view-radio">Table</label>
-        </div>
 
         <!-- My Recent Summits Container -->
         <div id="my-recent-summits-container" class="view active">
@@ -129,6 +116,16 @@
       </aside>
 
       <div id="view-wrapper">
+        <!-- Map/Table Toggle Button -->
+        <div class="toggle-view-container">
+          <!-- Map Radio -->
+          <input type="radio" id="map-view-radio" name="view" checked />
+          <label for="map-view-radio">Map</label>
+          <!-- Table Radio -->
+          <input type="radio" id="table-view-radio" name="view" />
+          <label for="table-view-radio">Table</label>
+        </div>
+
         <!-- Map View -->
         <div id="map" class="view active">
           <button id="preview-mode-banner" type="button">
