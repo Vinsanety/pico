@@ -781,7 +781,7 @@ function processQueue() {
       activeToasts--;
       processQueue();
     }, 250);
-  }, 1115000);
+  }, 5000);
 }
 
 /* ===== Add Summit Form Submission ===== */

@@ -937,7 +937,7 @@ ul#peak-suggestions li:last-child {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 300px;
+  min-width: 320px;
   max-width: 420px;
   background-color: var(--panel);
   color: var(--text);
@@ -1006,6 +1006,9 @@ footer .copyright {
     width: auto;
   }
 
+  #toast-container {
+    bottom: 25px;
+  }
   .toast {
     background-color: var(--bg-light);
     color: var(--text-dark);
