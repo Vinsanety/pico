@@ -255,13 +255,12 @@ function renderMySummitsTable(highlightId = null) {
   // Build header
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  ["Summit", "Location", "Elevation (ft)", "Date", "Actions"].forEach(
-    (title) => {
-      const th = document.createElement("th");
-      th.textContent = title;
-      headerRow.appendChild(th);
-    }
-  );
+  const headers = ["Summit", "Location", "Elevation (ft)", "Date", "Actions"];
+  headers.forEach((title) => {
+    const th = document.createElement("th");
+    th.textContent = title;
+    headerRow.appendChild(th);
+  });
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
@@ -281,11 +280,13 @@ function renderMySummitsTable(highlightId = null) {
     // Summit cell
     const summitTd = document.createElement("td");
     summitTd.textContent = formatPeakName(peak.name);
+    summitTd.setAttribute("data-label", "Summit:");
     tr.appendChild(summitTd);
 
     // Location cell
     const locationTd = document.createElement("td");
     locationTd.textContent = getLocationFromPeakName(peak.name);
+    locationTd.setAttribute("data-label", "Location:");
     tr.appendChild(locationTd);
 
     // Elevation cell
@@ -293,6 +294,7 @@ function renderMySummitsTable(highlightId = null) {
     elevTd.textContent = peak.elevation
       ? `${peak.elevation.toLocaleString("en-US")} ft`
       : " - ";
+    elevTd.setAttribute("data-label", "Elevation:");
     tr.appendChild(elevTd);
 
     // Date cell
@@ -305,6 +307,7 @@ function renderMySummitsTable(highlightId = null) {
       badge.textContent = "No date";
       dateTd.appendChild(badge);
     }
+    dateTd.setAttribute("data-label", "Date:");
     tr.appendChild(dateTd);
 
     // Actions cell
@@ -313,6 +316,7 @@ function renderMySummitsTable(highlightId = null) {
     actionTd.appendChild(createShowOnMapButton(peak));
     actionTd.appendChild(createEditButton(peak));
     actionTd.appendChild(createDeleteButton(peak));
+    actionTd.setAttribute("data-label", "Actions:");
     tr.appendChild(actionTd);
 
     tbody.appendChild(tr);
