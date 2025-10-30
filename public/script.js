@@ -146,10 +146,12 @@ const cancelAddSummitBtn = document.getElementById("cancel-add-summit-btn");
 function showForm() {
   myRecentSummitsContainer.classList.remove("active");
   addSummitForm.classList.add("active");
+  dateInput.focus();
 }
 function showMySummits() {
   addSummitForm.classList.remove("active");
   myRecentSummitsContainer.classList.add("active");
+  addSummitBtn.focus();
 }
 addSummitBtn.addEventListener("click", showForm);
 cancelAddSummitBtn.addEventListener("click", showMySummits);

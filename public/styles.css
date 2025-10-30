@@ -456,7 +456,9 @@ header.mobile-header {
 
 /* ===== MY RECENT SUMMITS CONTAINER ===== */
 #add-summit-btn {
-  margin-bottom: 1rem;
+  display: block;
+  width: 90%;
+  margin: 0 auto 2rem;
 }
 ul#recent-summits-list {
   list-style: none;
