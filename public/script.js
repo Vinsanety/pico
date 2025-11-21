@@ -601,7 +601,9 @@ function showAddPeakPreview(peakData) {
 
     const value = document.createElement("span");
     value.classList.add("preview-value");
-    value.textContent = `${peakData.elevation} ft`;
+    value.textContent = `${Number(peakData.elevation).toLocaleString(
+      "en-US"
+    )} ft`;
 
     p.appendChild(label);
     p.appendChild(value);
@@ -797,11 +799,13 @@ addSummitForm.addEventListener("submit", async (e) => {
   addSummitPreview.classList.remove("show");
   const name = summitInput.value.trim();
   const date = dateInput.value;
-  let elevation = elevationInput.value
-    ? parseInt(elevationInput.value, 10)
-    : summitInput.dataset.elevation
-    ? parseInt(summitInput.dataset.elevation, 10)
-    : null;
+  // let elevation = elevationInput.value
+  //   ? parseInt(elevationInput.value, 10)
+  //   : summitInput.dataset.elevation
+  //   ? parseInt(summitInput.dataset.elevation, 10)
+  //   : null;
+
+  const elevation = Number(summitInput.dataset.elevation);
 
   if (!name) {
     alert("Please enter a peak name.");
@@ -1041,7 +1045,9 @@ function openDeleteModal(peak) {
   message.style.whiteSpace = "pre-line";
   message.textContent = `Are you sure you want to delete ${formatPeakName(
     peak.name
-  )} on ${formatDateUS(peak.date)}?\n\nThis action cannot be undone.`;
+  )} on ${
+    peak.date ? formatDateUS(peak.date) : "(no date added)"
+  }?\n\nThis action cannot be undone.`;
 
   const cancelBtn = document.createElement("button");
   cancelBtn.type = "button";
