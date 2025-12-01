@@ -1088,3 +1088,17 @@ function init() {
 }
 
 init();
+
+/* ===== 404 Message ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  const path = window.location.pathname;
+
+  // Allowed routes (home only)
+  const allowed = ["/"];
+
+  if (!allowed.includes(path)) {
+    // Hide the app and show 404
+    document.getElementById("app").style.display = "none";
+    document.getElementById("route-not-found").classList.remove("display-none");
+  }
+});
