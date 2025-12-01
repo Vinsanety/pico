@@ -41,9 +41,36 @@ body {
 }
 
 /* ===== HELPER CLASSES ===== */
+
+.display-none {
+  display: none;
+}
+
 .muted {
   color: var(--muted);
   font-size: 13px;
+}
+
+/* ===== 404 Message ===== */
+.invalid-route-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100dvw;
+  height: calc(100dvh - 90px);
+}
+.invalid-route-container a {
+  padding: 0.5rem;
+  color: var(--accent);
+  border-radius: 0.5rem;
+}
+.invalid-route-container a:hover,
+.invalid-route-container a:focus {
+  color: var(--accent-dim);
+}
+.invalid-route-container a:focus {
+  outline: 3px solid var(--accent-dim);
 }
 
 /* ===== BUTTONS ===== */
