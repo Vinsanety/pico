@@ -152,6 +152,12 @@ function showMySummits() {
   addSummitForm.classList.remove("active");
   myRecentSummitsContainer.classList.add("active");
   addSummitBtn.focus();
+  // Fully clear and close the suggestion dropdown
+  clearSuggestions();
+  clearTimeout(debounceTimer);
+  peakSuggestions.classList.remove("show");
+  summitInput.blur();
+  showAddPeakPreview(null);
 }
 addSummitBtn.addEventListener("click", showForm);
 cancelAddSummitBtn.addEventListener("click", showMySummits);
@@ -656,8 +662,22 @@ let debounceTimer;
 
 // Utility to clear suggestions
 function clearSuggestions() {
-  peakSuggestions.replaceChildren(); // clears all children
+  peakSuggestions.replaceChildren(); // clear old content
   peakSuggestions.classList.remove("show");
+}
+
+function showPreviewSpinner() {
+  addSummitPreview.replaceChildren(); // clear old content
+  addSummitPreview.classList.add("show");
+
+  const spinner = document.createElement("div");
+  spinner.className = "spinner";
+  spinner.textContent = "Loading summit data...";
+  addSummitPreview.appendChild(spinner);
+}
+
+function hidePreviewSpinner() {
+  addSummitPreview.replaceChildren();
 }
 
 summitInput.addEventListener("input", () => {
@@ -699,28 +719,39 @@ summitInput.addEventListener("input", () => {
           li.textContent = r.display_name;
 
           li.addEventListener("click", async () => {
-            const lat = parseFloat(r.lat);
-            const lon = parseFloat(r.lon);
-            const elev = await getElevationFromOSM(lat, lon);
-
-            summitInput.value = r.display_name;
-            summitInput.dataset.lat = lat;
-            summitInput.dataset.lon = lon;
-            summitInput.dataset.elevation = elev || "";
-            summitInput.dataset.city =
-              r.address.city || r.address.town || r.address.village || "";
-            summitInput.dataset.state = r.address.state || "";
-
+            // 1. Clear the suggestion list immediately
             clearSuggestions();
 
-            showAddPeakPreview({
-              name: r.display_name,
-              elevation: elev,
-              lat,
-              lon,
-              city: summitInput.dataset.city,
-              state: summitInput.dataset.state,
-            });
+            // 2. Show spinner in preview area
+            showPreviewSpinner();
+
+            try {
+              const lat = parseFloat(r.lat);
+              const lon = parseFloat(r.lon);
+              const elev = await getElevationFromOSM(lat, lon);
+
+              summitInput.value = r.display_name;
+              summitInput.dataset.lat = lat;
+              summitInput.dataset.lon = lon;
+              summitInput.dataset.elevation = elev || "";
+              summitInput.dataset.city =
+                r.address.city || r.address.town || r.address.village || "";
+              summitInput.dataset.state = r.address.state || "";
+
+              // 3. Hide spinner and show preview
+              hidePreviewSpinner();
+              showAddPeakPreview({
+                name: r.display_name,
+                elevation: elev,
+                lat,
+                lon,
+                city: summitInput.dataset.city,
+                state: summitInput.dataset.state,
+              });
+            } catch (err) {
+              console.error("Suggestion click error:", err);
+              hidePreviewSpinner();
+            }
           });
 
           peakSuggestions.appendChild(li);
