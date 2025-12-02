@@ -268,17 +268,18 @@ input[type="number"] {
   letter-spacing: 0.5px; /* makes numbers feel more airy */
 }
 
-/* Style type="date" calendar icon to be white in Safari, Chrome, Edge */
+/* === type="date" tweaks === */
+/* Style calendar icon to be white in Safari, Chrome, Edge */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1) sepia(1) saturate(5) hue-rotate(200deg);
   cursor: pointer;
 }
 /* Reset native styling */
-input[type="date"],
-input[type="number"] {
+input[type="date"] {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
+  width: fit-content;
 }
 
 /* TODO: Remove after release? */
