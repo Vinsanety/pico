@@ -3,7 +3,7 @@
 A web app for tracking mountain summits, visualizing them on a map, and managing your climbing history.
 
 ## Live Demo
-[View Pico Live](https://your-deployment-link.com)
+[View Pico Live](https://pico-summit-log.web.app/)
 
 ## Features
 - Add summits with autocomplete search and elevation lookup  
