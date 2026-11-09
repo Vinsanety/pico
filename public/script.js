@@ -192,7 +192,6 @@ function showAddPeakView({ toggle = false } = {}) {
   setRailActive("compose");
   hideAllSheetPanels();
   logSheet.hidden = false;
-  dateInput.focus();
 }
 
 function beginLogAnotherClimb(peak) {
@@ -227,8 +226,6 @@ function beginLogAnotherClimb(peak) {
     state: peak.state || "",
     elevation: elev,
   });
-
-  dateInput.focus();
 }
 
 function showLogbookView({ toggle = false } = {}) {
@@ -903,8 +900,6 @@ async function openAddPeakFromSearch(place) {
       console.error("Elevation lookup failed:", err);
     }
   }
-
-  dateInput.focus();
 }
 
 async function beginLogFromPlace(place) {

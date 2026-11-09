@@ -286,7 +286,8 @@ body {
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 0.95rem;
+  /* 16px prevents iOS Safari/Chrome from zooming on focus */
+  font-size: 16px;
   outline: none;
 }
 
@@ -486,7 +487,8 @@ body {
   background: #fff;
   color: var(--text);
   font: inherit;
-  font-size: 0.86rem;
+  /* 16px prevents iOS Safari/Chrome from zooming on focus */
+  font-size: 16px;
 }
 
 .logbook-toolbar input[type="search"]:focus,
@@ -1237,6 +1239,8 @@ input[type="date"],
 input[type="number"],
 textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 0.8rem 0.9rem;
   border-radius: var(--radius);
   border: 1px solid var(--sheet-edge);
@@ -1244,13 +1248,60 @@ textarea {
   color: var(--text);
   outline: none;
   font-family: inherit;
-  font-size: 0.95rem;
+  /* 16px prevents iOS Safari/Chrome from zooming on focus */
+  font-size: 16px;
+  line-height: 1.35;
+  min-height: 3.05rem;
+  box-sizing: border-box;
+}
+
+.form-field {
+  min-width: 0;
+}
+
+/* iOS ignores width on date inputs unless appearance is none */
+input[type="date"] {
+  position: relative;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+  padding-right: 2.75rem;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+  min-height: 1.35em;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  padding: 0;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 50%;
+  right: 0.9rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  padding: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.55;
 }
 
 textarea {
   resize: vertical;
   min-height: 6rem;
   line-height: 1.45;
+  height: auto;
 }
 
 input[type="text"]:focus,
@@ -1767,11 +1818,11 @@ body.sheet-open .leaflet-top.leaflet-right .leaflet-control-zoom {
 }
 
 .toast.success {
-  background: var(--primary);
+  background: #1d4ed8;
 }
 
 .toast.destructive {
-  background: var(--red);
+  background: #9a3412;
 }
 
 .toast.show {
