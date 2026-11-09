@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pico - Summit Log</title>
-    <!-- Favicon  Support-->
+    <meta
+      name="description"
+      content="Log mountain summits on a live map and keep a climbing history that actually feels like the outdoors."
+    />
+
     <link
       rel="icon"
       type="image/png"
@@ -20,9 +24,15 @@
     />
     <meta name="apple-mobile-web-app-title" content="Pico" />
     <link rel="manifest" href="/favicon/site.webmanifest" />
-    <!-- Leaflet CSS -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <!-- MarkerCluster CSS -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
@@ -34,113 +44,313 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="banner">⚠️ Prototype Demo — Work in Progress ⚠️</div>
-
     <div id="app" class="app">
-      <!-- Sidebar -->
-      <aside>
-        <header>
-          <div class="header-logo-container">
-            <img src="/logo/Pico_Icon-Logo.png" alt="Pico Summit Log" />
-            <p>
-              PICO
-              <span>Summit Log</span>
-            </p>
-          </div>
-          <div class="subheader muted">
-            Log summits and track your progress.
-          </div>
-        </header>
+      <div id="map" class="map-stage"></div>
 
-        <!-- My Recent Summits Container -->
-        <div id="my-recent-summits-container" class="view active">
-          <h3 class="my-summits-heading">
-            Total Summits:&nbsp;
-            <span id="my-summit-count">-</span>
-          </h3>
-
-          <!-- Submit Summit Button -->
-          <button id="add-summit-btn" class="primary-btn">Add Summit</button>
-
-          <!-- Recent Summits List (last 5 logged)-->
-          <h4>Recent Summits</h4>
-          <ul id="recent-summits-list"></ul>
+      <nav class="side-rail" aria-label="Pico">
+        <div class="rail-brand">
+          <span class="rail-logo-wrap">
+            <img
+              class="rail-logo"
+              src="/logo/Pico_Icon-Logo.png"
+              alt="Pico"
+              width="40"
+              height="40"
+            />
+          </span>
+          <span class="rail-wordmark">Pico</span>
         </div>
 
-        <!-- Main Form -->
-        <form id="add-summit-form" class="view">
-          <h3>Log a Summit</h3>
+        <div class="rail-nav">
+          <button
+            type="button"
+            id="add-summit-btn"
+            class="rail-btn"
+            aria-controls="my-recent-summits-container"
+            aria-pressed="false"
+          >
+            <span class="rail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                <path
+                  d="M12 5v14M5 12h14"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </span>
+            <span class="rail-label">Add peak</span>
+          </button>
 
-          <div class="form-fields-container">
-            <!-- Date Input -->
-            <div class="form-field">
-              <label for="summit-date">Date climbed</label>
-              <input id="summit-date" type="date" />
-            </div>
-
-            <!-- Summit Name Combobox -->
-            <div class="form-field">
-              <label for="summit-input">Summit</label>
-              <input
-                id="summit-input"
-                type="text"
-                placeholder="Start typing a peak…"
-                autocomplete="off"
-              />
-              <ul id="peak-suggestions"></ul>
-            </div>
-
-            <!-- Elevation Input -->
-            <!-- <div class="form-field">
-              <label for="summit-elevation">Elevation (ft)</label>
-              <input
-                id="summit-elevation"
-                type="number"
-                placeholder="e.g. 14265"
-              />
-            </div> -->
-
-            <!-- Preview Summit before submitting -->
-            <div id="add-summit-preview"></div>
-
-            <!-- Log or Cancel Buttons -->
-            <div class="form-actions">
-              <button
-                type="button"
-                id="cancel-add-summit-btn"
-                class="secondary-btn"
-              >
-                Cancel
-              </button>
-              <button type="submit" class="primary-btn">Log Summit</button>
-            </div>
-          </div>
-        </form>
-      </aside>
-
-      <div id="view-wrapper">
-        <!-- Map/Table Toggle Button -->
-        <div class="toggle-view-container">
-          <!-- Map Radio -->
-          <input type="radio" id="map-view-radio" name="view" checked />
-          <label for="map-view-radio">Map</label>
-          <!-- Table Radio -->
-          <input type="radio" id="table-view-radio" name="view" />
-          <label for="table-view-radio">Table</label>
-        </div>
-
-        <!-- Map View -->
-        <div id="map" class="view active">
-          <button id="preview-mode-banner" type="button">
-            Close Preview Mode
+          <button
+            type="button"
+            id="open-logbook-btn"
+            class="rail-btn"
+            aria-controls="my-recent-summits-container"
+            aria-pressed="false"
+          >
+            <span class="rail-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                <path
+                  d="M6 4.75h9.5A2.75 2.75 0 0 1 18.25 7.5v12.25H8.5A2.75 2.75 0 0 0 5.75 22.5"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M5.75 4.75v15.5A2.75 2.75 0 0 1 8.5 17.5h9.75"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <span class="rail-label">Logbook</span>
+            <span id="my-summit-count" class="rail-count">0</span>
           </button>
         </div>
 
-        <!-- Table View -->
-        <div id="my-summits-table" class="view"></div>
+        <div class="rail-demo-row">
+          <span class="rail-demo">Demo</span>
+          <button
+            type="button"
+            id="demo-info-btn"
+            class="rail-info-btn"
+            aria-label="About this demo"
+            title="About this demo"
+          >
+            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+              <circle
+                cx="8"
+                cy="8"
+                r="6.25"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+              <path
+                d="M8 7.2v3.2M8 5.2h.01"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      <div class="top-search" role="search">
+        <label class="visually-hidden" for="map-search">Search the map</label>
+        <div class="top-search-field">
+          <span class="top-search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+              <circle
+                cx="11"
+                cy="11"
+                r="6.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+              />
+              <path
+                d="M16.2 16.2 20 20"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+          <input
+            id="map-search"
+            type="search"
+            placeholder="Search peaks, places, or your log…"
+            autocomplete="off"
+          />
+        </div>
+        <ul id="map-search-results" class="map-search-results" hidden></ul>
       </div>
 
-      <!-- Reusable Modal -->
+      <aside
+        id="my-recent-summits-container"
+        class="sheet"
+        aria-label="Panel"
+        hidden
+      >
+        <div class="sheet-content" id="sheet-content">
+          <div class="sheet-compose" id="log-sheet" hidden>
+            <header class="sheet-subhead">
+              <div>
+                <p class="sheet-kicker">New entry</p>
+                <h2 id="log-sheet-title">Add a peak</h2>
+              </div>
+              <button
+                type="button"
+                id="cancel-add-summit-btn"
+                class="ghost-btn"
+                aria-label="Close add peak panel"
+              >
+                Close
+              </button>
+            </header>
+
+            <form id="add-summit-form">
+              <div class="form-fields-container">
+                <div class="form-field">
+                  <label for="summit-date">Date climbed</label>
+                  <input id="summit-date" type="date" />
+                </div>
+
+                <div class="form-field">
+                  <label for="summit-input">Summit</label>
+                  <input
+                    id="summit-input"
+                    type="text"
+                    placeholder="Start typing a peak…"
+                    autocomplete="off"
+                  />
+                  <ul id="peak-suggestions"></ul>
+                </div>
+
+                <div class="form-field">
+                  <label for="summit-entry-title">Title</label>
+                  <input
+                    id="summit-entry-title"
+                    type="text"
+                    placeholder="Optional title for this climb"
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="summit-entry-notes">Notes</label>
+                  <textarea
+                    id="summit-entry-notes"
+                    rows="4"
+                    placeholder="Conditions, route notes, partners…"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="primary-btn">Save to log</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="sheet-info" id="peak-info-view" hidden>
+            <header class="peak-info-head">
+              <div class="peak-info-heading">
+                <p class="sheet-kicker">Summit</p>
+                <h2 id="peak-info-title">Peak</h2>
+              </div>
+              <button
+                type="button"
+                id="peak-info-back-btn"
+                class="ghost-btn logbook-back-btn"
+                aria-label="Back to logbook"
+                hidden
+              >
+                &lt; Logbook
+              </button>
+              <button
+                type="button"
+                id="close-peak-info-btn"
+                class="ghost-btn"
+                aria-label="Close summit info"
+              >
+                Close
+              </button>
+            </header>
+            <div id="peak-info-body" class="peak-info-body"></div>
+          </div>
+
+          <div class="sheet-logbook" id="logbook-view" hidden>
+            <div class="logbook-stack" id="logbook-stack">
+              <div
+                class="logbook-page logbook-page-list"
+                id="logbook-page-list"
+              >
+                <header class="sheet-subhead">
+                  <div>
+                    <p class="sheet-kicker">Your history</p>
+                    <h2>Logbook</h2>
+                    <p class="logbook-summit-count" id="logbook-summit-count"></p>
+                  </div>
+                  <button
+                    type="button"
+                    id="close-logbook-btn"
+                    class="ghost-btn"
+                    aria-label="Close logbook"
+                  >
+                    Close
+                  </button>
+                </header>
+
+                <div class="logbook-toolbar">
+                  <label class="visually-hidden" for="logbook-search"
+                    >Search climbs</label
+                  >
+                  <input
+                    id="logbook-search"
+                    type="search"
+                    placeholder="Search peaks or places…"
+                    autocomplete="off"
+                  />
+                  <label class="visually-hidden" for="logbook-sort"
+                    >Sort by</label
+                  >
+                  <select id="logbook-sort">
+                    <option value="date-desc">Newest first</option>
+                    <option value="date-asc">Oldest first</option>
+                    <option value="name">Name A–Z</option>
+                    <option value="elevation-desc">Highest first</option>
+                  </select>
+                </div>
+
+                <p class="logbook-meta" id="logbook-meta" aria-live="polite"></p>
+                <ul id="recent-summits-list"></ul>
+                <button
+                  type="button"
+                  id="logbook-load-more"
+                  class="secondary-btn"
+                  hidden
+                >
+                  Load more
+                </button>
+              </div>
+
+              <div
+                class="logbook-page logbook-page-detail"
+                id="logbook-page-detail"
+                hidden
+                aria-hidden="true"
+              >
+                <header class="sheet-subhead logbook-detail-head">
+                  <button
+                    type="button"
+                    id="logbook-back-btn"
+                    class="ghost-btn logbook-back-btn"
+                    aria-label="Back to logbook list"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    id="close-logbook-detail-btn"
+                    class="ghost-btn"
+                    aria-label="Close logbook"
+                  >
+                    Close
+                  </button>
+                </header>
+                <div id="logbook-detail" class="logbook-detail-body"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
       <div
         id="app-modal"
         class="modal hidden"
@@ -156,24 +366,18 @@
         </div>
       </div>
 
-      <!-- Toast Message -->
       <div id="toast-container"></div>
     </div>
 
-    <!-- 404 Message -->
     <div id="route-not-found" class="display-none">
       <div class="invalid-route-container">
-        <h1>404 - Page Not Found</h1>
-        <p>Sorry, the page you are looking for does not exist.</p>
-        <a id="go-home-btn" href="/">Go back Home</a>
+        <p class="demo-label">Pico</p>
+        <h1>Page not found</h1>
+        <p>That route does not exist.</p>
+        <a id="go-home-btn" href="/">Back home</a>
       </div>
     </div>
 
-    <footer>
-      <p class="copyright">&copy; 2025 Vahala Designs</p>
-    </footer>
-
-    <!-- Leaflet & JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="script.js"></script>
