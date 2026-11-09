@@ -37,6 +37,7 @@ const logbookSummitCount = document.getElementById("logbook-summit-count");
 const mapSearchInput = document.getElementById("map-search");
 const mapSearchResults = document.getElementById("map-search-results");
 const demoInfoBtn = document.getElementById("demo-info-btn");
+const homeBtn = document.getElementById("home-btn");
 const editSubmissionModal = document.getElementById("edit-submission-modal");
 const editSummitDate = document.getElementById("edit-summit-date");
 const DEMO_ACK_KEY = "pico-demo-acknowledged";
@@ -515,6 +516,14 @@ function getPeakLocation(peak) {
   );
 }
 
+function setLogbookDetailInert(isInert) {
+  if (!logbookPageDetail) return;
+  logbookPageDetail.hidden = isInert;
+  logbookPageDetail.setAttribute("aria-hidden", isInert ? "true" : "false");
+  if (isInert) logbookPageDetail.setAttribute("inert", "");
+  else logbookPageDetail.removeAttribute("inert");
+}
+
 function showLogbookListPage() {
   if (!logbookStack) return;
   const wasDetail = logbookStack.classList.contains("is-detail");
@@ -522,23 +531,20 @@ function showLogbookListPage() {
   if (!logbookPageDetail) return;
 
   if (!wasDetail) {
-    logbookPageDetail.hidden = true;
-    logbookPageDetail.setAttribute("aria-hidden", "true");
+    setLogbookDetailInert(true);
     return;
   }
 
   window.setTimeout(() => {
     if (!logbookStack.classList.contains("is-detail")) {
-      logbookPageDetail.hidden = true;
-      logbookPageDetail.setAttribute("aria-hidden", "true");
+      setLogbookDetailInert(true);
     }
   }, 320);
 }
 
 function showLogbookDetailPage() {
   if (!logbookStack || !logbookPageDetail) return;
-  logbookPageDetail.hidden = false;
-  logbookPageDetail.setAttribute("aria-hidden", "false");
+  setLogbookDetailInert(false);
   // Next frame so the enter transition runs from translateX(108%)
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -2200,6 +2206,29 @@ function openDemoDisclaimer({ force = false } = {}) {
     body,
     actions,
     dismissible: true,
+  });
+}
+
+function goHome() {
+  closeSheet();
+  clearMapSearchResults();
+  clearMapSearchMarker();
+  if (mapSearchInput) {
+    mapSearchInput.value = "";
+    mapSearchInput.blur();
+  }
+  clearSelectedPeak();
+  clearSuggestions();
+  showAddPeakPreview(null);
+  if (map && typeof usaBounds !== "undefined") {
+    map.fitBounds(usaBounds);
+  }
+}
+
+if (homeBtn) {
+  homeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    goHome();
   });
 }
 

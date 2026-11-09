@@ -48,18 +48,18 @@
       <div id="map" class="map-stage"></div>
 
       <nav class="side-rail" aria-label="Pico">
-        <div class="rail-brand">
+        <button type="button" class="rail-brand" id="home-btn" aria-label="Pico home">
           <span class="rail-logo-wrap">
             <img
               class="rail-logo"
               src="/logo/Pico_Icon-Logo.png"
-              alt="Pico"
+              alt=""
               width="40"
               height="40"
             />
           </span>
           <span class="rail-wordmark">Pico</span>
-        </div>
+        </button>
 
         <div class="rail-nav">
           <button
@@ -112,16 +112,16 @@
           </button>
         </div>
 
-        <div class="rail-demo-row">
+        <button
+          type="button"
+          id="demo-info-btn"
+          class="rail-demo-row"
+          aria-label="About this demo"
+          title="About this demo"
+        >
           <span class="rail-demo">Demo</span>
-          <button
-            type="button"
-            id="demo-info-btn"
-            class="rail-info-btn"
-            aria-label="About this demo"
-            title="About this demo"
-          >
-            <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+          <span class="rail-info-btn" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="12" height="12">
               <circle
                 cx="8"
                 cy="8"
@@ -137,8 +137,8 @@
                 stroke-linecap="round"
               />
             </svg>
-          </button>
-        </div>
+          </span>
+        </button>
       </nav>
 
       <div class="top-search" role="search">
@@ -324,6 +324,7 @@
                 class="logbook-page logbook-page-detail"
                 id="logbook-page-detail"
                 hidden
+                inert
                 aria-hidden="true"
               >
                 <header class="sheet-subhead logbook-detail-head">
