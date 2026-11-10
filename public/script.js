@@ -210,11 +210,14 @@ function beginLogAnotherClimb(peak) {
   logSheet.hidden = false;
 
   summitInput.value = name;
+  const prominence = getClimbProminence(peak, getClimbsForSummit(peak));
   summitInput.dataset.lat = lat != null ? String(lat) : "";
   summitInput.dataset.lon = lon != null ? String(lon) : "";
   summitInput.dataset.city = peak.city || "";
   summitInput.dataset.state = peak.state || "";
   summitInput.dataset.elevation = elev != null ? String(elev) : "";
+  summitInput.dataset.prominence =
+    prominence != null ? String(prominence) : "";
   if (dateInput) dateInput.value = "";
   if (entryTitleInput) entryTitleInput.value = "";
   if (entryNotesInput) entryNotesInput.value = "";
@@ -226,6 +229,7 @@ function beginLogAnotherClimb(peak) {
     city: peak.city || "",
     state: peak.state || "",
     elevation: elev,
+    prominence,
   });
 }
 
@@ -280,6 +284,7 @@ function findLoggedPeakForTarget(target) {
 }
 
 function peakTargetFromClimb(peak) {
+  const climbs = getClimbsForSummit(peak);
   return {
     name: formatPeakName(peak.name),
     displayName: peak.name,
@@ -287,7 +292,8 @@ function peakTargetFromClimb(peak) {
     lon: Number(peak.lon),
     city: peak.city || "",
     state: peak.state || "",
-    elevation: getClimbElevation(peak, getClimbsForSummit(peak)),
+    elevation: getClimbElevation(peak, climbs),
+    prominence: getClimbProminence(peak, climbs),
     peak,
   };
 }
@@ -302,6 +308,9 @@ function renderPeakInfoPane(target) {
   const elev =
     parseElevation(target.elevation) ??
     (latest ? getClimbElevation(latest, climbs) : null);
+  const prominence =
+    parseElevation(target.prominence) ??
+    (latest ? getClimbProminence(latest, climbs) : null);
   const location =
     getSearchPlaceLocation(target) ||
     (latest ? getPeakLocation(latest) : "");
@@ -344,6 +353,9 @@ function renderPeakInfoPane(target) {
   const facts = document.createElement("dl");
   facts.className = "logbook-info-list peak-info-facts";
   appendInfoRow(facts, "Elevation", formatElevationFt(elev) || "Unknown");
+  if (prominence != null) {
+    appendInfoRow(facts, "Prominence", formatElevationFt(prominence));
+  }
   if (target.lat != null && target.lon != null) {
     appendInfoRow(
       facts,
@@ -365,6 +377,7 @@ function renderPeakInfoPane(target) {
       city: target.city || "",
       state: target.state || "",
       elevation: elev,
+      prominence,
     };
     beginLogAnotherClimb(source);
   });
@@ -472,6 +485,11 @@ function openPeakInfoPane(target, { focusMap = true, source } = {}) {
       (loggedPeak
         ? getClimbElevation(loggedPeak, getClimbsForSummit(loggedPeak))
         : null),
+    prominence:
+      parseElevation(target.prominence) ??
+      (loggedPeak
+        ? getClimbProminence(loggedPeak, getClimbsForSummit(loggedPeak))
+        : null),
   };
 
   clearMapSearchResults();
@@ -481,6 +499,7 @@ function openPeakInfoPane(target, { focusMap = true, source } = {}) {
   if (peakInfoView) peakInfoView.hidden = false;
   showLogbookListPage();
   renderPeakInfoPane(currentInfoTarget);
+  enrichPeakInfoProminence(currentInfoTarget);
 
   document.querySelectorAll(".climb-item.is-active").forEach((el) => {
     el.classList.remove("is-active");
@@ -559,6 +578,24 @@ function parseElevation(value) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+function metersTagToFeet(value) {
+  const meters = parseFloat(value);
+  if (!Number.isFinite(meters) || meters <= 0) return null;
+  return Math.round(meters * 3.28084);
+}
+
+function prominenceFromExtratags(extratags) {
+  if (!extratags) return null;
+  if (extratags.prominence != null) {
+    return metersTagToFeet(extratags.prominence);
+  }
+  // Rare, but some objects tag feet explicitly
+  if (extratags["prominence:ft"] != null) {
+    return parseElevation(extratags["prominence:ft"]);
+  }
+  return null;
+}
+
 function formatElevationFt(value) {
   const elev = parseElevation(value);
   return elev == null ? null : `${elev.toLocaleString("en-US")} ft`;
@@ -570,6 +607,16 @@ function getClimbElevation(climb, climbs = []) {
   for (const entry of climbs) {
     const elev = parseElevation(entry?.elevation);
     if (elev != null) return elev;
+  }
+  return null;
+}
+
+function getClimbProminence(climb, climbs = []) {
+  const own = parseElevation(climb?.prominence);
+  if (own != null) return own;
+  for (const entry of climbs) {
+    const prominence = parseElevation(entry?.prominence);
+    if (prominence != null) return prominence;
   }
   return null;
 }
@@ -879,6 +926,7 @@ async function openAddPeakFromSearch(place) {
 
   const name = place.displayName || place.name;
   let elevation = parseElevation(place.elevation);
+  let prominence = parseElevation(place.prominence);
 
   setLogSheetTitle(`Add a peak · ${formatPeakName(name)}`);
   openSheet("compose");
@@ -892,18 +940,25 @@ async function openAddPeakFromSearch(place) {
   summitInput.dataset.city = place.city || "";
   summitInput.dataset.state = place.state || "";
   summitInput.dataset.elevation = elevation != null ? String(elevation) : "";
+  summitInput.dataset.prominence =
+    prominence != null ? String(prominence) : "";
   if (dateInput) dateInput.value = "";
   if (entryTitleInput) entryTitleInput.value = "";
   if (entryNotesInput) entryNotesInput.value = "";
 
-  if (elevation == null && place.lat && place.lon) {
+  if ((elevation == null || prominence == null) && place.lat && place.lon) {
     try {
-      elevation = await getElevationFromOSM(place.lat, place.lon);
-      if (elevation != null) {
+      const metrics = await getOsmPeakMetrics(place.lat, place.lon);
+      if (elevation == null && metrics.elevation != null) {
+        elevation = metrics.elevation;
         summitInput.dataset.elevation = String(elevation);
       }
+      if (prominence == null && metrics.prominence != null) {
+        prominence = metrics.prominence;
+        summitInput.dataset.prominence = String(prominence);
+      }
     } catch (err) {
-      console.error("Elevation lookup failed:", err);
+      console.error("Peak metrics lookup failed:", err);
     }
   }
 }
@@ -941,12 +996,7 @@ async function runMapSearch(query) {
 
   let placeMatches = [];
   try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=8&q=${encodeURIComponent(
-        query,
-      )}`,
-    );
-    placeMatches = filterSummits(await res.json());
+    placeMatches = await searchSummitPlaces(query, { limit: 8 });
   } catch (err) {
     console.error("Map search error:", err);
   }
@@ -954,6 +1004,7 @@ async function runMapSearch(query) {
   const unified = new Map();
 
   logMatches.forEach((peak) => {
+    const climbs = getClimbsForSummit(peak);
     const target = {
       name: formatPeakName(peak.name),
       displayName: peak.name,
@@ -961,7 +1012,8 @@ async function runMapSearch(query) {
       lon: Number(peak.lon),
       city: peak.city || "",
       state: peak.state || "",
-      elevation: getClimbElevation(peak, getClimbsForSummit(peak)),
+      elevation: getClimbElevation(peak, climbs),
+      prominence: getClimbProminence(peak, climbs),
       peak,
     };
     unified.set(searchTargetKey(target), target);
@@ -969,14 +1021,8 @@ async function runMapSearch(query) {
 
   placeMatches.forEach((place) => {
     const title = place.display_name.split(",")[0];
-    let elevation = null;
-    const eleTag = place.extratags?.ele;
-    if (eleTag) {
-      const meters = parseFloat(eleTag);
-      if (Number.isFinite(meters)) {
-        elevation = Math.round(meters * 3.28084);
-      }
-    }
+    const elevation = metersTagToFeet(place.extratags?.ele);
+    const prominence = prominenceFromExtratags(place.extratags);
     const target = {
       lat: parseFloat(place.lat),
       lon: parseFloat(place.lon),
@@ -989,6 +1035,7 @@ async function runMapSearch(query) {
         "",
       state: place.address?.state || "",
       elevation,
+      prominence,
     };
     const key = searchTargetKey(target);
     if (unified.has(key)) {
@@ -997,6 +1044,7 @@ async function runMapSearch(query) {
         ...target,
         ...existing,
         elevation: existing.elevation ?? target.elevation,
+        prominence: existing.prominence ?? target.prominence,
         city: existing.city || target.city,
         state: existing.state || target.state,
       });
@@ -1008,6 +1056,9 @@ async function runMapSearch(query) {
       target.elevation =
         target.elevation ??
         getClimbElevation(logged, getClimbsForSummit(logged));
+      target.prominence =
+        target.prominence ??
+        getClimbProminence(logged, getClimbsForSummit(logged));
     }
     unified.set(key, target);
   });
@@ -1110,36 +1161,79 @@ function createEditButton(peak) {
   return btn;
 }
 
-/* ===== OSM Elevation API Fetch  ===== */
-async function getElevationFromOSM(lat, lon) {
-  // Overpass query: find nodes/ways with ele=* within ~100m of the point
+/* ===== OSM Elevation / Prominence Fetch  ===== */
+async function getOsmPeakMetrics(lat, lon) {
+  // Nearby natural features often carry ele and/or prominence tags
   const query = `
     [out:json];
     (
-      node(around:100,${lat},${lon})["ele"];
-      way(around:100,${lat},${lon})["ele"];
+      node(around:150,${lat},${lon})["ele"];
+      way(around:150,${lat},${lon})["ele"];
+      node(around:150,${lat},${lon})["prominence"];
+      way(around:150,${lat},${lon})["prominence"];
     );
-    out center 1;
+    out center 8;
   `;
+  const metrics = { elevation: null, prominence: null };
   try {
     const res = await fetch("https://overpass-api.de/api/interpreter", {
       method: "POST",
       body: query,
     });
     const data = await res.json();
-    if (data.elements && data.elements.length > 0) {
-      const eleTag = data.elements[0].tags.ele;
-      if (eleTag) {
-        const meters = parseFloat(eleTag);
-        if (!isNaN(meters)) {
-          return Math.round(meters * 3.28084); // feet
-        }
+    for (const element of data.elements || []) {
+      const tags = element.tags || {};
+      if (metrics.elevation == null && tags.ele != null) {
+        metrics.elevation = metersTagToFeet(tags.ele);
       }
+      if (metrics.prominence == null) {
+        metrics.prominence = prominenceFromExtratags(tags);
+      }
+      if (metrics.elevation != null && metrics.prominence != null) break;
     }
   } catch (err) {
-    console.error("Overpass elevation lookup failed:", err);
+    console.error("Overpass peak metrics lookup failed:", err);
   }
-  return null; // fallback if no ele tag
+  return metrics;
+}
+
+async function getElevationFromOSM(lat, lon) {
+  const metrics = await getOsmPeakMetrics(lat, lon);
+  return metrics.elevation;
+}
+
+async function enrichPeakInfoProminence(target) {
+  if (!target?.lat || !target?.lon) return;
+  if (parseElevation(target.prominence) != null) return;
+
+  const requestKey = `${Number(target.lat).toFixed(5)},${Number(target.lon).toFixed(5)}`;
+  try {
+    const metrics = await getOsmPeakMetrics(target.lat, target.lon);
+    if (!currentInfoTarget) return;
+    const currentKey = `${Number(currentInfoTarget.lat).toFixed(5)},${Number(
+      currentInfoTarget.lon,
+    ).toFixed(5)}`;
+    if (currentKey !== requestKey) return;
+
+    let changed = false;
+    if (
+      metrics.prominence != null &&
+      parseElevation(currentInfoTarget.prominence) == null
+    ) {
+      currentInfoTarget.prominence = metrics.prominence;
+      changed = true;
+    }
+    if (
+      metrics.elevation != null &&
+      parseElevation(currentInfoTarget.elevation) == null
+    ) {
+      currentInfoTarget.elevation = metrics.elevation;
+      changed = true;
+    }
+    if (changed) renderPeakInfoPane(currentInfoTarget);
+  } catch (err) {
+    console.error("Prominence enrich failed:", err);
+  }
 }
 
 function savePeaks() {
@@ -1655,20 +1749,52 @@ function renderMapMarkers() {
   });
 }
 
-/* ===== Shared Summit Filter ===== */
-function filterSummits(results) {
-  const summitTypes = [
-    "peak",
-    "volcano",
-    "hill",
-    "mountain",
-    "ridge",
-    "summit",
-  ];
+/* ===== Shared Summit Search ===== */
+const SUMMIT_TYPES = [
+  "peak",
+  "volcano",
+  "hill",
+  "mountain",
+  "ridge",
+  "summit",
+];
 
-  return results.filter(
-    (r) => r.class === "natural" && summitTypes.includes(r.type),
+function filterSummits(results) {
+  return (results || []).filter(
+    (r) => r.class === "natural" && SUMMIT_TYPES.includes(r.type),
   );
+}
+
+function queryLooksPeakScoped(query) {
+  return /\b(peak|mount|mt\.?|mountain|volcano|hill|ridge|summit)\b/i.test(
+    query,
+  );
+}
+
+async function fetchNominatimPlaces(query, limit = 8) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=${limit}&q=${encodeURIComponent(
+      query,
+    )}`,
+  );
+  return res.json();
+}
+
+async function searchSummitPlaces(query, { limit = 8 } = {}) {
+  const trimmed = String(query || "").trim();
+  if (!trimmed) return [];
+
+  let results = filterSummits(await fetchNominatimPlaces(trimmed, limit));
+  if (results.length || queryLooksPeakScoped(trimmed)) {
+    return results.slice(0, limit);
+  }
+
+  // Bare names like "elbert" often rank counties above peaks in Nominatim
+  for (const q of [`${trimmed} peak`, `mount ${trimmed}`]) {
+    results = filterSummits(await fetchNominatimPlaces(q, limit));
+    if (results.length) return results.slice(0, limit);
+  }
+  return [];
 }
 
 /* ===== Map Live Preview ===== */
@@ -1734,6 +1860,7 @@ function clearEntryFields() {
     summitInput.dataset.lat = "";
     summitInput.dataset.lon = "";
     summitInput.dataset.elevation = "";
+    summitInput.dataset.prominence = "";
     summitInput.dataset.city = "";
     summitInput.dataset.state = "";
   }
@@ -1781,22 +1908,6 @@ function showAddPeakPreview(peakData, { mapPin = true } = {}) {
   });
 }
 
-/* ===== Shared Summit Filter ===== */
-function filterSummits(results) {
-  const summitTypes = [
-    "peak",
-    "volcano",
-    "hill",
-    "mountain",
-    "ridge",
-    "summit",
-  ];
-
-  return results.filter(
-    (r) => r.class === "natural" && summitTypes.includes(r.type),
-  );
-}
-
 /* ===== Typeahead Autocomplete (OSM + Elevation) ===== */
 let debounceTimer;
 
@@ -1834,14 +1945,7 @@ summitInput.addEventListener("input", () => {
     peakSuggestions.classList.add("show");
 
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&q=${encodeURIComponent(
-          query,
-        )}`,
-      );
-
-      const results = await res.json();
-      const peaksOnly = filterSummits(results);
+      const peaksOnly = await searchSummitPlaces(query, { limit: 5 });
 
       clearSuggestions();
 
@@ -1862,16 +1966,12 @@ summitInput.addEventListener("input", () => {
             try {
               const lat = parseFloat(r.lat);
               const lon = parseFloat(r.lon);
-              let elev = null;
-              const eleTag = r.extratags?.ele;
-              if (eleTag) {
-                const meters = parseFloat(eleTag);
-                if (Number.isFinite(meters)) {
-                  elev = Math.round(meters * 3.28084);
-                }
-              }
-              if (elev == null) {
-                elev = await getElevationFromOSM(lat, lon);
+              let elev = metersTagToFeet(r.extratags?.ele);
+              let prominence = prominenceFromExtratags(r.extratags);
+              if (elev == null || prominence == null) {
+                const metrics = await getOsmPeakMetrics(lat, lon);
+                elev = elev ?? metrics.elevation;
+                prominence = prominence ?? metrics.prominence;
               }
 
               summitInput.value = r.display_name;
@@ -1879,6 +1979,8 @@ summitInput.addEventListener("input", () => {
               summitInput.dataset.lon = lon;
               summitInput.dataset.elevation =
                 elev != null ? String(elev) : "";
+              summitInput.dataset.prominence =
+                prominence != null ? String(prominence) : "";
               summitInput.dataset.city =
                 r.address.city || r.address.town || r.address.village || "";
               summitInput.dataset.state = r.address.state || "";
@@ -1888,6 +1990,7 @@ summitInput.addEventListener("input", () => {
               showAddPeakPreview({
                 name: r.display_name,
                 elevation: elev,
+                prominence,
                 lat,
                 lon,
                 city: summitInput.dataset.city,
@@ -1968,6 +2071,7 @@ addSummitForm.addEventListener("submit", async (e) => {
   const title = entryTitleInput?.value.trim() || "";
   const notes = entryNotesInput?.value.trim() || "";
   let elevation = parseElevation(summitInput.dataset.elevation);
+  let prominence = parseElevation(summitInput.dataset.prominence);
 
   if (!name) {
     alert("Please enter a peak name.");
@@ -1982,14 +2086,7 @@ addSummitForm.addEventListener("submit", async (e) => {
   // If no coords yet, geocode
   if (!lat || !lon) {
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&q=${encodeURIComponent(
-          name,
-        )}`,
-      );
-      const results = await res.json();
-
-      const peaksOnly = filterSummits(results);
+      const peaksOnly = await searchSummitPlaces(name, { limit: 5 });
 
       if (peaksOnly.length === 0) {
         alert(
@@ -2009,26 +2106,28 @@ addSummitForm.addEventListener("submit", async (e) => {
         "";
       state = best.address.state || best.address.region || "";
 
-      const eleTag = best.extratags?.ele;
-      if (!elevation && eleTag) {
-        const meters = parseFloat(eleTag);
-        if (Number.isFinite(meters)) {
-          elevation = Math.round(meters * 3.28084);
-        }
+      if (!elevation) {
+        elevation = metersTagToFeet(best.extratags?.ele);
+      }
+      if (!prominence) {
+        prominence = prominenceFromExtratags(best.extratags);
       }
     } catch (err) {
       console.error("Geocoding error:", err);
     }
   }
 
-  if (!elevation && lat && lon) {
-    elevation = await getElevationFromOSM(lat, lon);
+  if ((!elevation || !prominence) && lat && lon) {
+    const metrics = await getOsmPeakMetrics(lat, lon);
+    elevation = elevation ?? metrics.elevation;
+    prominence = prominence ?? metrics.prominence;
   }
 
   const peakData = {
     id: Date.now(),
     name,
     elevation,
+    prominence,
     lat,
     lon,
     date,
